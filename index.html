@@ -529,8 +529,7 @@
         // --- AI API Calls ---
         async function callGeminiTextAPI(promptContent) {
             const userApiKey = apiKeyInput.value.trim();
-            const apiKey = userApiKey || ""; // Use user-provided key or fallback for environment injection
-
+            const apiKey = userApiKey || "AIzaSyBqV7GAinY7BE1mxj16_f_mMIP1ADBri9o";
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
             
             const payload = {
