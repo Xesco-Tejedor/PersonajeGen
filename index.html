@@ -3,672 +3,712 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌟 Creador de Fichas de Personaje con IA 🌟</title>
+    <title>AI Character Sheet Creator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
+        /* Custom scrollbar for webkit browsers */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #1a1a2e; /* Fondo oscuro azulado/morado */
-            color: #e0e0e0; /* Texto claro */
-        }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .tab-button.active {
-            background-color: #4a4e69; /* Morado más oscuro para tab activo */
-            color: #ffffff;
-            border-bottom-color: #9a8c98; /* Borde inferior distintivo */
+            background-color: #f0f2f5; /* Light gray background */
         }
         .tab-button {
-            background-color: #2c2f48; /* Morado oscuro para tabs */
-            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease-in-out;
         }
-        .card {
-            background-color: #2c2f48; /* Color base de las tarjetas */
-            border: 1px solid #4a4e69; /* Borde sutil */
-            border-radius: 0.5rem; /* Esquinas redondeadas */
+        .tab-button.active {
+            border-color: #3b82f6; /* Blue-500 */
+            color: #3b82f6;
+            background-color: #eff6ff; /* Blue-50 */
         }
-        .input-field, .textarea-field {
-            background-color: #1f233a; /* Fondo de inputs más oscuro */
-            border: 1px solid #4a4e69;
-            color: #e0e0e0;
-            border-radius: 0.375rem; /* Esquinas redondeadas para inputs */
+        .tab-content {
+            display: none;
         }
-        .input-field:focus, .textarea-field:focus {
+        .tab-content.active {
+            display: block;
+        }
+        .art-style-card {
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+        }
+        .art-style-card.selected {
+            border-color: #3b82f6; /* Blue-500 */
+            box-shadow: 0 0 0 2px #3b82f6;
+            transform: translateY(-2px);
+        }
+        .form-input, .form-textarea {
+            border-radius: 0.375rem; /* rounded-md */
+            border: 1px solid #d1d5db; /* gray-300 */
+            padding: 0.5rem 0.75rem;
+            width: 100%;
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .form-input:focus, .form-textarea:focus {
+            border-color: #3b82f6; /* Blue-500 */
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
             outline: none;
-            border-color: #9a8c98; /* Color de borde al enfocar */
-            box-shadow: 0 0 0 2px rgba(154, 140, 152, 0.5); /* Sombra sutil al enfocar */
+        }
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.375rem; /* rounded-md */
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         .btn-primary {
-            background-color: #7e57c2; /* Morado vibrante para botón primario */
+            background-color: #3b82f6; /* Blue-500 */
             color: white;
-            transition: background-color 0.3s ease;
         }
         .btn-primary:hover {
-            background-color: #673ab7; /* Morado más oscuro al pasar el mouse */
+            background-color: #2563eb; /* Blue-600 */
         }
         .btn-secondary {
-            background-color: #4a4e69;
+            background-color: #6b7280; /* Gray-500 */
             color: white;
-            transition: background-color 0.3s ease;
         }
         .btn-secondary:hover {
-            background-color: #3b3e5a;
+            background-color: #4b5563; /* Gray-600 */
         }
-        .artistic-style-card {
+        .btn-outline {
+            background-color: transparent;
+            color: #3b82f6; /* Blue-500 */
+            border: 1px solid #3b82f6;
+        }
+        .btn-outline:hover {
+            background-color: #eff6ff; /* Blue-50 */
+        }
+        .section-title {
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 600; /* font-semibold */
+            color: #1f2937; /* gray-800 */
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb; /* gray-200 */
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            font-weight: bold;
             cursor: pointer;
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            color: #888;
         }
-        .artistic-style-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+        .modal-close:hover {
+            color: #000;
         }
-        .artistic-style-card.selected {
-            border-color: #7e57c2; /* Borde morado para estilo seleccionado */
-            box-shadow: 0 0 0 3px rgba(126, 87, 194, 0.5);
+        .thumbnail-container img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .thumbnail-container img:hover {
+            border-color: #3b82f6;
+        }
+        #imagePreviewModal img {
+            max-width: 90vw;
+            max-height: 80vh;
+            border-radius: 8px;
         }
         .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #7e57c2;
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #3b82f6; /* Blue */
             border-radius: 50%;
             width: 30px;
             height: 30px;
             animation: spin 1s linear infinite;
-            margin: 0 auto;
+            margin-right: 10px;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        .modal-content {
-            background-color: #2c2f48;
-            padding: 20px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 500px;
+        .hidden {
+            display: none;
         }
     </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="p-4 md:p-8">
-    <div class="container mx-auto max-w-5xl">
-        <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">
-                🌟 Creador de Fichas de Personaje con IA 🌟
-            </h1>
-            <p class="text-lg mt-2 text-gray-300">Da vida a tus personajes con imágenes generadas por IA.</p>
+<body class="bg-slate-100 text-slate-800 p-4 md:p-8">
+
+    <div class="container mx-auto max-w-5xl bg-white p-6 md:p-8 rounded-lg shadow-xl">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-blue-600">Creador de Fichas de Personaje con IA</h1>
+            <p class="text-slate-600 mt-2">Define, desarrolla y visualiza tus personajes.</p>
         </header>
 
-        <main class="space-y-8">
-            <div class="card p-6">
-                <div class="border-b border-gray-600 mb-4">
-                    <nav class="flex space-x-1" aria-label="Tabs">
-                        <button class="tab-button active px-4 py-2 text-sm font-medium rounded-t-lg" data-tab="basicInfo">Información Básica</button>
-                        <button class="tab-button px-4 py-2 text-sm font-medium rounded-t-lg" data-tab="appearance">Apariencia</button>
-                        <button class="tab-button px-4 py-2 text-sm font-medium rounded-t-lg" data-tab="personality">Personalidad</button>
-                    </nav>
-                </div>
+        <!-- Tabs Navigation -->
+        <div class="mb-6 border-b border-slate-300">
+            <nav class="flex flex-wrap -mb-px" aria-label="Tabs">
+                <button class="tab-button active text-lg py-3 px-4 md:px-6 border-b-2 font-medium" data-tab="basic">📄 Información Básica</button>
+                <button class="tab-button text-lg py-3 px-4 md:px-6 border-b-2 font-medium" data-tab="appearance">👁️ Apariencia</button>
+                <button class="tab-button text-lg py-3 px-4 md:px-6 border-b-2 font-medium" data-tab="personality">🧠 Personalidad</button>
+            </nav>
+        </div>
 
-                <div id="basicInfo" class="tab-content active space-y-4">
-                    <h3 class="text-xl font-semibold mb-2 text-purple-300">Información Básica</h3>
-                    <div>
-                        <label for="charName" class="block text-sm font-medium mb-1">Nombre del Personaje:</label>
-                        <input type="text" id="charName" class="input-field w-full p-2" placeholder="Ej: Eldrin Guardián del Alba">
-                    </div>
-                    <div>
-                        <label for="charTitle" class="block text-sm font-medium mb-1">Título/Apodo:</label>
-                        <input type="text" id="charTitle" class="input-field w-full p-2" placeholder="Ej: El Valiente, La Sombra Silenciosa">
-                    </div>
-                    <div>
-                        <label for="charRace" class="block text-sm font-medium mb-1">Raza/Especie:</label>
-                        <input type="text" id="charRace" class="input-field w-full p-2" placeholder="Ej: Elfo del bosque, Humano, Orco">
-                    </div>
-                    <div>
-                        <label for="charOccupation" class="block text-sm font-medium mb-1">Ocupación/Clase:</label>
-                        <input type="text" id="charOccupation" class="input-field w-full p-2" placeholder="Ej: Mago, Guerrero, Explorador Estelar">
-                    </div>
-                    <div class="relative">
-                        <label for="charBackground" class="block text-sm font-medium mb-1">Historia de Fondo (breve):</label>
-                        <textarea id="charBackground" class="textarea-field w-full p-2" rows="4" placeholder="Un breve resumen de su origen e historia..."></textarea>
-                        <button id="expandStoryBtn" class="btn-secondary absolute bottom-3 right-3 text-xs px-2 py-1 rounded">
-                            <i class="fas fa-wand-magic-sparkles mr-1"></i> Expandir Historia
-                        </button>
-                        <div id="expandStoryLoader" class="loader hidden absolute bottom-3 right-3"></div>
-                    </div>
-                </div>
-
-                <div id="appearance" class="tab-content space-y-4">
-                    <h3 class="text-xl font-semibold mb-2 text-purple-300">Apariencia</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="charHeight" class="block text-sm font-medium mb-1">Altura:</label>
-                            <input type="text" id="charHeight" class="input-field w-full p-2" placeholder="Ej: 1.80m, 6 pies">
-                        </div>
-                        <div>
-                            <label for="charWeight" class="block text-sm font-medium mb-1">Peso/Complexión:</label>
-                            <input type="text" id="charWeight" class="input-field w-full p-2" placeholder="Ej: 75kg, Delgado, Musculoso">
-                        </div>
-                    </div>
-                    <div>
-                        <label for="charFeatures" class="block text-sm font-medium mb-1">Rasgos Distintivos:</label>
-                        <textarea id="charFeatures" class="textarea-field w-full p-2" rows="3" placeholder="Ej: Cicatriz en el ojo izquierdo, cabello color fuego, tatuajes rúnicos"></textarea>
-                    </div>
-                    <div>
-                        <label for="charClothing" class="block text-sm font-medium mb-1">Vestimenta:</label>
-                        <textarea id="charClothing" class="textarea-field w-full p-2" rows="3" placeholder="Ej: Armadura de placas ornamentada, túnica de hechicero oscura, traje de explorador funcional"></textarea>
-                    </div>
-                    <div>
-                        <label for="charEquipment" class="block text-sm font-medium mb-1">Equipamiento/Accesorios:</label>
-                        <textarea id="charEquipment" class="textarea-field w-full p-2" rows="3" placeholder="Ej: Espada larga con gemas, báculo nudoso, bláster modificado"></textarea>
-                    </div>
-                </div>
-
-                <div id="personality" class="tab-content space-y-4">
-                    <h3 class="text-xl font-semibold mb-2 text-purple-300">Personalidad</h3>
-                    <div>
-                        <label for="charTraits" class="block text-sm font-medium mb-1">Rasgos de Personalidad:</label>
-                        <textarea id="charTraits" class="textarea-field w-full p-2" rows="3" placeholder="Ej: Valiente, Cauteloso, Sarcástico, Leal"></textarea>
-                    </div>
-                    <div>
-                        <label for="charIdeals" class="block text-sm font-medium mb-1">Ideales:</label>
-                        <textarea id="charIdeals" class="textarea-field w-full p-2" rows="2" placeholder="Ej: Justicia, Libertad, Conocimiento"></textarea>
-                    </div>
-                    <div>
-                        <label for="charFlaws" class="block text-sm font-medium mb-1">Defectos/Debilidades:</label>
-                        <textarea id="charFlaws" class="textarea-field w-full p-2" rows="2" placeholder="Ej: Arrogante, Miedo a las alturas, Impulsivo"></textarea>
-                    </div>
-                    <div>
-                        <label for="charQuotes" class="block text-sm font-medium mb-1">Citas Memorables (opcional):</label>
-                        <input type="text" id="charQuotes" class="input-field w-full p-2" placeholder="Ej: 'La fortuna favorece a los audaces'">
-                    </div>
-                </div>
-            </div>
-
-            <div class="card p-6">
-                <h3 class="text-xl font-semibold mb-4 text-purple-300">Estilo Artístico y Configuración de IA</h3>
+        <!-- Tab Content -->
+        <div id="tab-content">
+            <!-- Basic Information Tab -->
+            <div id="basic-tab" class="tab-content active space-y-6">
                 <div>
-                    <label for="apiKey" class="block text-sm font-medium mb-1">Tu Clave API de Gemini (Opcional - para modelos no gratuitos):</label>
-                    <input type="password" id="apiKey" class="input-field w-full p-2 mb-3" placeholder="Pega tu clave API aquí si es necesaria">
-                    <p class="text-xs text-gray-400 mb-4">Si no proporcionas una clave, se intentará usar el modelo gratuito `gemini-2.0-flash` para texto y `imagen-3.0-generate-002` para imágenes (que no requiere clave aquí).</p>
+                    <label for="charName" class="block text-sm font-medium text-slate-700 mb-1">Nombre del Personaje:</label>
+                    <input type="text" id="charName" class="form-input" placeholder="Ej: Arion Valerius">
                 </div>
-
-                <label class="block text-sm font-medium mb-2">Selecciona un Estilo Artístico:</label>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                    <div class="artistic-style-card p-4 text-center border-2 border-transparent rounded-lg selected" data-style="Concept Art">
-                        <i class="fas fa-palette fa-2x mb-2 text-yellow-400"></i>
-                        <p class="font-semibold">Concept Art</p>
-                    </div>
-                    <div class="artistic-style-card p-4 text-center border-2 border-transparent rounded-lg" data-style="Pixar Style">
-                        <i class="fas fa-film fa-2x mb-2 text-blue-400"></i>
-                        <p class="font-semibold">Estilo Pixar</p>
-                    </div>
-                    <div class="artistic-style-card p-4 text-center border-2 border-transparent rounded-lg" data-style="Cyberpunk">
-                        <i class="fas fa-robot fa-2x mb-2 text-pink-400"></i>
-                        <p class="font-semibold">Cyberpunk</p>
-                    </div>
-                    <div class="artistic-style-card p-4 text-center border-2 border-transparent rounded-lg" data-style="Anime">
-                        <i class="fas fa-dragon fa-2x mb-2 text-red-400"></i>
-                        <p class="font-semibold">Anime</p>
-                    </div>
-                </div>
-
                 <div>
-                    <label for="negativePrompts" class="block text-sm font-medium mb-1">Prompts Negativos (opcional):</label>
-                    <input type="text" id="negativePrompts" class="input-field w-full p-2" placeholder="Ej: borroso, deformado, texto, múltiples brazos">
-                    <p class="text-xs text-gray-400 mt-1">Palabras clave para evitar en la imagen.</p>
+                    <label for="charTitle" class="block text-sm font-medium text-slate-700 mb-1">Título/Apodo:</label>
+                    <input type="text" id="charTitle" class="form-input" placeholder="Ej: El Errante Silencioso">
                 </div>
-            </div>
-
-            <div class="card p-6">
-                <h3 class="text-xl font-semibold mb-2 text-purple-300">Vista Previa del Prompt de IA (Base)</h3>
-                <div id="promptPreview" class="textarea-field w-full p-3 min-h-[100px] bg-opacity-50 text-sm whitespace-pre-wrap">
-                    La vista previa del prompt aparecerá aquí a medida que completes los detalles...
+                <div>
+                    <label for="charRace" class="block text-sm font-medium text-slate-700 mb-1">Raza/Especie:</label>
+                    <input type="text" id="charRace" class="form-input" placeholder="Ej: Humano, Elfo, Constructo">
                 </div>
-                 <p class="text-xs text-gray-400 mt-1">Este es el prompt base. La IA lo refinará para la generación de imágenes.</p>
-            </div>
-
-            <div class="text-center">
-                <button id="generateSheetBtn" class="btn-primary font-bold py-3 px-8 rounded-lg text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
-                    <i class="fas fa-magic mr-2"></i>Generar Ficha de Personaje
+                <div>
+                    <label for="charClass" class="block text-sm font-medium text-slate-700 mb-1">Ocupación/Clase:</label>
+                    <input type="text" id="charClass" class="form-input" placeholder="Ej: Mago, Piloto, Detective">
+                </div>
+                <div>
+                    <label for="charBackground" class="block text-sm font-medium text-slate-700 mb-1">Resumen de la Historia de Fondo:</label>
+                    <textarea id="charBackground" rows="4" class="form-textarea" placeholder="Una breve descripción de su pasado..."></textarea>
+                </div>
+                <button id="expandStoryBtn" class="btn btn-outline">
+                    <span class="loader hidden mr-2"></span>✨ Expandir Historia con IA
                 </button>
-                <div id="generationLoader" class="loader hidden mt-4"></div>
-            </div>
 
-            <div id="generatedImagesSection" class="card p-6 hidden">
-                <h3 class="text-xl font-semibold mb-4 text-purple-300">Imágenes Generadas</h3>
-                <div id="mainCharacterImageContainer" class="mb-4 text-center">
-                    <img id="mainCharacterImage" src="https://placehold.co/512x512/2c2f48/e0e0e0?text=Personaje+Principal" alt="Personaje Principal" class="max-w-full h-auto mx-auto rounded-lg shadow-md max-h-[512px]">
+                <div class="mt-8 pt-6 border-t border-slate-200 space-x-0 space-y-3 md:space-x-3 md:space-y-0">
+                    <button id="exportSheetBtn" class="btn btn-secondary w-full md:w-auto">📤 Exportar Ficha</button>
+                    <button id="importSheetBtn" class="btn btn-secondary w-full md:w-auto">📥 Importar Ficha</button>
                 </div>
-                <div id="thumbnailImagesContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                <div id="importSection" class="hidden mt-4 space-y-3">
+                    <label for="importJson" class="block text-sm font-medium text-slate-700">Pega el contenido JSON de la ficha aquí:</label>
+                    <textarea id="importJson" rows="5" class="form-textarea"></textarea>
+                    <button id="loadSheetBtn" class="btn btn-primary">Cargar Ficha</button>
+                </div>
+            </div>
+
+            <!-- Appearance Tab -->
+            <div id="appearance-tab" class="tab-content space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="charHeight" class="block text-sm font-medium text-slate-700 mb-1">Altura:</label>
+                        <input type="text" id="charHeight" class="form-input" placeholder="Ej: 1.80m">
                     </div>
+                    <div>
+                        <label for="charWeight" class="block text-sm font-medium text-slate-700 mb-1">Peso/Complexión:</label>
+                        <input type="text" id="charWeight" class="form-input" placeholder="Ej: 75kg, atlético">
+                    </div>
+                </div>
+                <div>
+                    <label for="charFeatures" class="block text-sm font-medium text-slate-700 mb-1">Rasgos Distintivos:</label>
+                    <textarea id="charFeatures" rows="3" class="form-textarea" placeholder="Cicatrices, tatuajes, ojos de diferente color..."></textarea>
+                </div>
+                <div>
+                    <label for="charClothing" class="block text-sm font-medium text-slate-700 mb-1">Vestimenta Típica:</label>
+                    <textarea id="charClothing" rows="3" class="form-textarea" placeholder="Armadura de cuero desgastada, túnica elegante..."></textarea>
+                </div>
+                <div>
+                    <label for="charEquipment" class="block text-sm font-medium text-slate-700 mb-1">Equipamiento/Accesorios:</label>
+                    <textarea id="charEquipment" rows="3" class="form-textarea" placeholder="Espada ancestral, kit de herramientas, amuleto misterioso..."></textarea>
+                </div>
             </div>
-        </main>
 
-        <footer class="text-center mt-12 py-4 border-t border-gray-700">
-            <p class="text-sm text-gray-400">&copy; 2024 Creador de Fichas de Personaje con IA. Inspirado en la idea original.</p>
-        </footer>
-    </div>
-
-    <div id="errorModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="flex justify-between items-center mb-3">
-                <h4 class="text-lg font-semibold text-red-400">Error</h4>
-                <button id="closeErrorModalBtn" class="text-gray-300 hover:text-white">&times;</button>
+            <!-- Personality Tab -->
+            <div id="personality-tab" class="tab-content space-y-6">
+                <div>
+                    <label for="charTraits" class="block text-sm font-medium text-slate-700 mb-1">Rasgos de Personalidad (separados por coma):</label>
+                    <input type="text" id="charTraits" class="form-input" placeholder="Valiente, sarcástico, leal, curioso...">
+                </div>
+                <div>
+                    <label for="charIdeals" class="block text-sm font-medium text-slate-700 mb-1">Ideales (separados por coma):</label>
+                    <input type="text" id="charIdeals" class="form-input" placeholder="Justicia, Libertad, Conocimiento, Venganza...">
+                </div>
+                <div>
+                    <label for="charFlaws" class="block text-sm font-medium text-slate-700 mb-1">Defectos/Debilidades (separados por coma):</label>
+                    <input type="text" id="charFlaws" class="form-input" placeholder="Arrogante, miedo a las alturas, impulsivo...">
+                </div>
+                <div>
+                    <label for="charQuotes" class="block text-sm font-medium text-slate-700 mb-1">Citas Memorables (opcional):</label>
+                    <textarea id="charQuotes" rows="3" class="form-textarea" placeholder="&quot;El destino se escribe con acciones, no con palabras.&quot;"></textarea>
+                </div>
             </div>
-            <p id="errorMessage" class="text-sm"></p>
+        </div>
+
+        <!-- AI Configuration and Artistic Style -->
+        <div class="mt-10 pt-6 border-t border-slate-300">
+            <h2 class="section-title">🎨 Estilo Artístico y Configuración de IA</h2>
+            <div class="space-y-6">
+                <div>
+                    <label for="apiKey" class="block text-sm font-medium text-slate-700 mb-1">Clave API de Google AI (Gemini) (Opcional):</label>
+                    <input type="password" id="apiKey" class="form-input" placeholder="Pega tu clave API aquí si la tienes">
+                    <p class="text-xs text-slate-500 mt-1">Si no proporcionas una clave, las funciones de IA podrían tener limitaciones o no funcionar.</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Selecciona un Estilo Artístico para la Imagen:</label>
+                    <div id="artisticStyleSelector" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                        <div class="art-style-card selected border-2 border-blue-500 p-3 rounded-lg text-center bg-slate-50 hover:bg-slate-100" data-style="Concept Art">Concept Art</div>
+                        <div class="art-style-card border p-3 rounded-lg text-center bg-slate-50 hover:bg-slate-100" data-style="Pixar Animation">Animación Pixar</div>
+                        <div class="art-style-card border p-3 rounded-lg text-center bg-slate-50 hover:bg-slate-100" data-style="Anime Sketch">Boceto Anime</div>
+                        <div class="art-style-card border p-3 rounded-lg text-center bg-slate-50 hover:bg-slate-100" data-style="Photorealistic Portrait">Retrato Fotorrealista</div>
+                        <div class="art-style-card border p-3 rounded-lg text-center bg-slate-50 hover:bg-slate-100" data-style="Dark Fantasy Art">Arte Fantasía Oscura</div>
+                        <div class="art-style-card border p-3 rounded-lg text-center bg-slate-50 hover:bg-slate-100" data-style="Cyberpunk">Cyberpunk</div>
+                        <div class="art-style-card border p-3 rounded-lg text-center bg-slate-50 hover:bg-slate-100" data-style="Watercolor Painting">Pintura Acuarela</div>
+                        <div class="art-style-card border p-3 rounded-lg text-center bg-slate-50 hover:bg-slate-100" data-style="Pixel Art">Pixel Art</div>
+                    </div>
+                    <input type="hidden" id="selectedArtStyle" value="Concept Art">
+                </div>
+                <div>
+                    <label for="negativePrompts" class="block text-sm font-medium text-slate-700 mb-1">Prompts Negativos (opcional, separados por coma):</label>
+                    <input type="text" id="negativePrompts" class="form-input" placeholder="Ej: borroso, deformado, mala anatomía">
+                    <p class="text-xs text-slate-500 mt-1">Elementos que NO quieres que aparezcan en la imagen.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Prompt Preview -->
+        <div class="mt-10 pt-6 border-t border-slate-300">
+            <h2 class="section-title">📝 Vista Previa del Prompt de IA (Base para Imagen)</h2>
+            <div id="promptPreview" class="p-4 bg-slate-50 rounded-md border border-slate-200 text-sm text-slate-700 min-h-[100px] whitespace-pre-wrap">
+                Actualiza los campos para ver la vista previa del prompt...
+            </div>
+        </div>
+
+        <!-- Generate Button -->
+        <div class="mt-10 pt-6 border-t border-slate-300 text-center">
+            <button id="generateSheetBtn" class="btn btn-primary text-lg px-8 py-3">
+                <span class="loader hidden mr-2"></span>🔮 Generar Ficha de Personaje (e Imágenes)
+            </button>
+        </div>
+
+        <!-- Generated Images -->
+        <div id="generatedImagesSection" class="mt-10 pt-6 border-t border-slate-300 hidden">
+            <h2 class="section-title">🖼️ Imágenes Generadas</h2>
+            <div id="imageThumbnails" class="thumbnail-container flex flex-wrap justify-center gap-4">
+                <!-- Thumbnails will be appended here -->
+            </div>
+            <p id="noImagesMessage" class="text-center text-slate-500 hidden">No se han generado imágenes aún o la generación falló.</p>
         </div>
     </div>
 
-    <script type="module">
-        // --- Módulo uiManager.js (simulado) ---
-        const uiManager = {
-            elements: {
-                // Pestañas
-                tabs: document.querySelectorAll('.tab-button'),
-                tabContents: document.querySelectorAll('.tab-content'),
-                // Formularios
-                charName: document.getElementById('charName'),
-                charTitle: document.getElementById('charTitle'),
-                charRace: document.getElementById('charRace'),
-                charOccupation: document.getElementById('charOccupation'),
-                charBackground: document.getElementById('charBackground'),
-                charHeight: document.getElementById('charHeight'),
-                charWeight: document.getElementById('charWeight'),
-                charFeatures: document.getElementById('charFeatures'),
-                charClothing: document.getElementById('charClothing'),
-                charEquipment: document.getElementById('charEquipment'),
-                charTraits: document.getElementById('charTraits'),
-                charIdeals: document.getElementById('charIdeals'),
-                charFlaws: document.getElementById('charFlaws'),
-                charQuotes: document.getElementById('charQuotes'),
-                // Configuración IA
-                apiKeyInput: document.getElementById('apiKey'),
-                artisticStyleCards: document.querySelectorAll('.artistic-style-card'),
-                negativePromptsInput: document.getElementById('negativePrompts'),
-                // Vistas previas y resultados
-                promptPreview: document.getElementById('promptPreview'),
-                generateSheetBtn: document.getElementById('generateSheetBtn'),
-                generationLoader: document.getElementById('generationLoader'),
-                expandStoryBtn: document.getElementById('expandStoryBtn'),
-                expandStoryLoader: document.getElementById('expandStoryLoader'),
-                generatedImagesSection: document.getElementById('generatedImagesSection'),
-                mainCharacterImage: document.getElementById('mainCharacterImage'),
-                thumbnailImagesContainer: document.getElementById('thumbnailImagesContainer'),
-                // Modal de error
-                errorModal: document.getElementById('errorModal'),
-                errorMessage: document.getElementById('errorMessage'),
-                closeErrorModalBtn: document.getElementById('closeErrorModalBtn'),
-            },
+    <!-- Message Modal -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('messageModal')">&times;</span>
+            <h3 id="messageModalTitle" class="text-xl font-semibold mb-3">Mensaje</h3>
+            <p id="messageModalText"></p>
+            <div class="mt-4 text-right">
+                <button class="btn btn-primary" onclick="closeModal('messageModal')">Entendido</button>
+            </div>
+        </div>
+    </div>
 
-            initializeTabs: function() {
-                this.elements.tabs.forEach(tab => {
-                    tab.addEventListener('click', () => {
-                        this.elements.tabs.forEach(t => t.classList.remove('active'));
-                        this.elements.tabContents.forEach(tc => tc.classList.remove('active'));
-                        tab.classList.add('active');
-                        document.getElementById(tab.dataset.tab).classList.add('active');
-                    });
-                });
-            },
+    <!-- Image Preview Modal -->
+    <div id="imagePreviewModal" class="modal" onclick="closeModal('imagePreviewModal')">
+        <div class="modal-content p-2 bg-transparent shadow-none max-w-max max-h-max" onclick="event.stopPropagation();">
+             <span class="modal-close text-white bg-black bg-opacity-50 rounded-full p-1 leading-none text-2xl -mr-3 -mt-3" onclick="closeModal('imagePreviewModal')">&times;</span>
+            <img id="fullPreviewImage" src="https://placehold.co/600x400/E2E8F0/4A5568?text=Preview" alt="Image Preview" class="rounded-lg">
+        </div>
+    </div>
 
-            initializeStyleSelector: function() {
-                this.elements.artisticStyleCards.forEach(card => {
-                    card.addEventListener('click', () => {
-                        this.elements.artisticStyleCards.forEach(c => c.classList.remove('selected', 'border-purple-500', 'shadow-lg'));
-                        card.classList.add('selected', 'border-purple-500', 'shadow-lg');
-                        main.updateBasePromptPreview(); // Actualizar vista previa al cambiar estilo
-                    });
-                });
-            },
+    <script>
+        // DOM Elements
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const apiKeyInput = document.getElementById('apiKey');
+        const expandStoryBtn = document.getElementById('expandStoryBtn');
+        const generateSheetBtn = document.getElementById('generateSheetBtn');
+        const promptPreview = document.getElementById('promptPreview');
+        const artisticStyleSelector = document.getElementById('artisticStyleSelector');
+        const selectedArtStyleInput = document.getElementById('selectedArtStyle');
+        const negativePromptsInput = document.getElementById('negativePrompts');
+        const imageThumbnailsContainer = document.getElementById('imageThumbnails');
+        const generatedImagesSection = document.getElementById('generatedImagesSection');
+        const noImagesMessage = document.getElementById('noImagesMessage');
+        
+        const exportSheetBtn = document.getElementById('exportSheetBtn');
+        const importSheetBtn = document.getElementById('importSheetBtn');
+        const importSection = document.getElementById('importSection');
+        const importJsonTextarea = document.getElementById('importJson');
+        const loadSheetBtn = document.getElementById('loadSheetBtn');
 
-            getSelectedStyle: function() {
-                const selectedCard = document.querySelector('.artistic-style-card.selected');
-                return selectedCard ? selectedCard.dataset.style : 'Concept Art';
-            },
-
-            getNegativePrompts: function() {
-                return this.elements.negativePromptsInput.value.trim();
-            },
-
-            getApiKey: function() {
-                return this.elements.apiKeyInput.value.trim();
-            },
-            
-            updatePromptPreview: function(promptText) {
-                this.elements.promptPreview.textContent = promptText;
-            },
-
-            displayLoading: function(loaderElement, buttonElement, isLoading) {
-                if (isLoading) {
-                    loaderElement.classList.remove('hidden');
-                    if (buttonElement) buttonElement.disabled = true;
-                } else {
-                    loaderElement.classList.add('hidden');
-                    if (buttonElement) buttonElement.disabled = false;
-                }
-            },
-
-            displayImages: function(imageUrls) {
-                if (!imageUrls || imageUrls.length === 0) {
-                    this.displayError("No se pudieron generar imágenes o no se recibieron URLs.");
-                    this.elements.generatedImagesSection.classList.add('hidden');
-                    return;
-                }
-                this.elements.mainCharacterImage.src = imageUrls[0];
-                this.elements.mainCharacterImage.onerror = () => {
-                    this.elements.mainCharacterImage.src = 'https://placehold.co/512x512/2c2f48/e0e0e0?text=Error+al+cargar';
-                };
-
-                this.elements.thumbnailImagesContainer.innerHTML = ''; // Limpiar miniaturas previas
-                imageUrls.forEach((url, index) => {
-                    const img = document.createElement('img');
-                    img.src = url;
-                    img.alt = `Personaje Variante ${index + 1}`;
-                    img.className = 'w-full h-auto rounded-md cursor-pointer hover:opacity-80 transition-opacity';
-                    img.onerror = () => {
-                        img.src = 'https://placehold.co/128x128/2c2f48/e0e0e0?text=Error';
-                    };
-                    img.addEventListener('click', () => {
-                        this.elements.mainCharacterImage.src = url;
-                    });
-                    this.elements.thumbnailImagesContainer.appendChild(img);
-                });
-                this.elements.generatedImagesSection.classList.remove('hidden');
-            },
-
-            displayError: function(message) {
-                console.error("Error en la aplicación:", message);
-                this.elements.errorMessage.textContent = message;
-                this.elements.errorModal.classList.remove('hidden');
-            },
-
-            initializeErrorModal: function() {
-                this.elements.closeErrorModalBtn.addEventListener('click', () => {
-                    this.elements.errorModal.classList.add('hidden');
-                });
-                this.elements.errorModal.addEventListener('click', (event) => {
-                    if (event.target === this.elements.errorModal) {
-                         this.elements.errorModal.classList.add('hidden');
-                    }
-                });
-            },
-
-            setupInputListeners: function(callback) {
-                const inputsToWatch = [
-                    this.elements.charName, this.elements.charTitle, this.elements.charRace, this.elements.charOccupation,
-                    this.elements.charBackground, this.elements.charHeight, this.elements.charWeight, this.elements.charFeatures,
-                    this.elements.charClothing, this.elements.charEquipment, this.elements.charTraits, this.elements.charIdeals,
-                    this.elements.charFlaws, this.elements.charQuotes, this.elements.negativePromptsInput
-                ];
-                inputsToWatch.forEach(input => {
-                    if (input) input.addEventListener('input', callback);
-                });
+        // Character data fields
+        const charFields = [
+            'charName', 'charTitle', 'charRace', 'charClass', 'charBackground',
+            'charHeight', 'charWeight', 'charFeatures', 'charClothing', 'charEquipment',
+            'charTraits', 'charIdeals', 'charFlaws', 'charQuotes'
+        ];
+        const charInputElements = {};
+        charFields.forEach(id => {
+            charInputElements[id] = document.getElementById(id);
+            if (charInputElements[id]) {
+                charInputElements[id].addEventListener('input', updatePromptPreview);
             }
-        };
-
-        // --- Módulo characterLogic.js (simulado) ---
-        const characterLogic = {
-            getCharacterDetails: function() {
-                const ui = uiManager.elements;
-                return {
-                    name: ui.charName.value.trim(),
-                    title: ui.charTitle.value.trim(),
-                    race: ui.charRace.value.trim(),
-                    occupation: ui.charOccupation.value.trim(),
-                    background: ui.charBackground.value.trim(),
-                    height: ui.charHeight.value.trim(),
-                    weight: ui.charWeight.value.trim(),
-                    features: ui.charFeatures.value.trim(),
-                    clothing: ui.charClothing.value.trim(),
-                    equipment: ui.charEquipment.value.trim(),
-                    traits: ui.charTraits.value.trim(),
-                    ideals: ui.charIdeals.value.trim(),
-                    flaws: ui.charFlaws.value.trim(),
-                    quotes: ui.charQuotes.value.trim(),
-                };
-            },
-
-            buildBasePrompt: function() {
-                const details = this.getCharacterDetails();
-                const style = uiManager.getSelectedStyle();
-                const negativePrompts = uiManager.getNegativePrompts();
-
-                let prompt = `Crear una imagen de un personaje con las siguientes características:\n`;
-                if (details.name) prompt += `- Nombre: ${details.name}\n`;
-                if (details.title) prompt += `- Título: ${details.title}\n`;
-                if (details.race) prompt += `- Raza/Especie: ${details.race}\n`;
-                if (details.occupation) prompt += `- Ocupación/Clase: ${details.occupation}\n`;
-                
-                prompt += `\nApariencia:\n`;
-                if (details.height) prompt += `- Altura: ${details.height}\n`;
-                if (details.weight) prompt += `- Peso/Complexión: ${details.weight}\n`;
-                if (details.features) prompt += `- Rasgos Distintivos: ${details.features}\n`;
-                if (details.clothing) prompt += `- Vestimenta: ${details.clothing}\n`;
-                if (details.equipment) prompt += `- Equipamiento: ${details.equipment}\n`;
-
-                prompt += `\nPersonalidad (influencia visual sutil):\n`;
-                if (details.traits) prompt += `- Rasgos: ${details.traits}\n`;
-                if (details.ideals) prompt += `- Ideales: ${details.ideals}\n`;
-                if (details.flaws) prompt += `- Defectos: ${details.flaws}\n`;
-                if (details.quotes) prompt += `- Cita: "${details.quotes}" (sugerir ambiente/expresión)\n`;
-
-                prompt += `\nEstilo Artístico: ${style}.\n`;
-                if (negativePrompts) {
-                    prompt += `Evitar estrictamente: ${negativePrompts}.\n`;
-                }
-                prompt += `La imagen debe ser detallada, de alta calidad y enfocada en el personaje.`;
-                return prompt;
-            }
-        };
-
-        // --- Módulo apiService.js (simulado) ---
-        const apiService = {
-            GEMINI_TEXT_API_URL_BASE: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash",
-            IMAGEN_API_URL_BASE: "https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002",
-
-            generateTextWithGemini: async function(promptContent, customApiKey = "") {
-                const apiKey = customApiKey || uiManager.getApiKey();
-                const apiUrl = `${this.GEMINI_TEXT_API_URL_BASE}:generateContent?key=${apiKey}`;
-                const payload = { contents: [{ role: "user", parts: [{ text: promptContent }] }] };
-
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        let errorData = {};
-                        try {
-                            errorData = JSON.parse(errorText);
-                        } catch (e) {
-                            console.warn("API Gemini (texto) error response was not valid JSON:", errorText);
-                        }
-                        console.error("Error en API Gemini (texto) (status !ok):", errorData, "Raw text:", errorText, "Status:", response.status);
-                        throw new Error(`Error de API Gemini (texto) (${response.status}): ${errorData.error?.message || response.statusText || errorText}`);
-                    }
-
-                    const responseText = await response.text();
-                    if (!responseText) {
-                        console.error("Error en API Gemini (texto): Respuesta OK pero cuerpo vacío.");
-                        throw new Error("Error de API Gemini (texto): Respuesta OK pero el cuerpo estaba vacío.");
-                    }
-
-                    let result;
-                    try {
-                        result = JSON.parse(responseText);
-                    } catch (parseError) {
-                        console.error("Error en API Gemini (texto): No se pudo parsear la respuesta JSON:", responseText, parseError);
-                        throw new Error(`Error de API Gemini (texto): Respuesta no válida. ${parseError.message}`);
-                    }
-
-                    if (result.candidates && result.candidates.length > 0 &&
-                        result.candidates[0].content && result.candidates[0].content.parts &&
-                        result.candidates[0].content.parts.length > 0) {
-                        return result.candidates[0].content.parts[0].text;
-                    } else {
-                        console.warn("Respuesta inesperada de API Gemini (texto) (después de parseo exitoso):", result);
-                        if (result.error) {
-                             throw new Error(`Error de API Gemini (texto): ${result.error.message || 'Error desconocido en la respuesta.'}`);
-                        }
-                        throw new Error("No se pudo obtener texto de la respuesta de Gemini o la estructura no es la esperada.");
-                    }
-                } catch (error) {
-                    console.error("Error en la función generateTextWithGemini:", error);
-                     if (error instanceof Error) {
-                        throw error;
-                    } else {
-                        throw new Error(String(error));
-                    }
-                }
-            },
-
-            generateImageWithImagen: async function(promptContent, numImages = 1, customApiKey = "") {
-                const apiKey = ""; // Dejar vacío para que Canvas lo maneje para Imagen API
-                const apiUrl = `${this.IMAGEN_API_URL_BASE}:predict?key=${apiKey}`;
-                const payload = {
-                    instances: [{ prompt: promptContent }],
-                    parameters: { "sampleCount": Math.max(1, Math.min(numImages, 4)) }
-                };
-                
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (!response.ok) {
-                        const errorText = await response.text(); 
-                        let errorData = {};
-                        try {
-                            errorData = JSON.parse(errorText); 
-                        } catch (e) {
-                            console.warn("API Imagen error response was not valid JSON:", errorText);
-                        }
-                        console.error("Error en API Imagen (status !ok):", errorData, "Raw text:", errorText, "Status:", response.status);
-                        throw new Error(`Error de API Imagen (${response.status}): ${errorData.error?.message || response.statusText || errorText}`);
-                    }
-
-                    const responseText = await response.text();
-                    if (!responseText) {
-                        console.error("Error en API Imagen: Respuesta OK pero cuerpo vacío.");
-                        throw new Error("Error de API Imagen: Respuesta OK pero el cuerpo estaba vacío.");
-                    }
-
-                    let result;
-                    try {
-                        result = JSON.parse(responseText);
-                    } catch (parseError) {
-                        console.error("Error en API Imagen: No se pudo parsear la respuesta JSON:", responseText, parseError);
-                        throw new Error(`Error de API Imagen: Respuesta no válida. ${parseError.message}`);
-                    }
-                    
-                    if (result.predictions && result.predictions.length > 0) {
-                        return result.predictions.map(p => `data:image/png;base64,${p.bytesBase64Encoded}`);
-                    } else {
-                        console.warn("Respuesta inesperada de API Imagen (después de parseo exitoso):", result);
-                        if (result.error) {
-                             throw new Error(`Error de API Imagen: ${result.error.message || 'Error desconocido en la respuesta.'}`);
-                        }
-                        throw new Error("No se pudieron obtener imágenes de la respuesta de Imagen, o la estructura no es la esperada.");
-                    }
-                } catch (error) {
-                    console.error("Error en la función generateImageWithImagen:", error);
-                    if (error instanceof Error) {
-                        throw error;
-                    } else {
-                        throw new Error(String(error));
-                    }
-                }
-            }
-        };
-
-        // --- Módulo main.js (simulado) ---
-        const main = {
-            init: function() {
-                uiManager.initializeTabs();
-                uiManager.initializeStyleSelector();
-                uiManager.initializeErrorModal();
-                uiManager.setupInputListeners(this.updateBasePromptPreview.bind(this));
-
-                uiManager.elements.generateSheetBtn.addEventListener('click', this.handleGenerateSheet.bind(this));
-                uiManager.elements.expandStoryBtn.addEventListener('click', this.handleExpandStory.bind(this));
-                
-                this.updateBasePromptPreview(); // Carga inicial de la vista previa
-            },
-
-            updateBasePromptPreview: function() {
-                const basePrompt = characterLogic.buildBasePrompt();
-                uiManager.updatePromptPreview(basePrompt);
-            },
-
-            handleExpandStory: async function() {
-                const briefBackground = uiManager.elements.charBackground.value.trim();
-                if (!briefBackground) {
-                    uiManager.displayError("Por favor, escribe una historia de fondo breve primero.");
-                    return;
-                }
-
-                uiManager.displayLoading(uiManager.elements.expandStoryLoader, uiManager.elements.expandStoryBtn, true);
-                try {
-                    const promptForExpansion = `Expande la siguiente breve historia de fondo de un personaje en una narrativa más detallada y atractiva (aproximadamente 3-4 párrafos). Mantén la esencia del personaje y añade detalles interesantes:\n\n"${briefBackground}"`;
-                    const expandedStory = await apiService.generateTextWithGemini(promptForExpansion);
-                    uiManager.elements.charBackground.value = expandedStory;
-                    this.updateBasePromptPreview(); // Actualizar prompt general
-                } catch (error) {
-                    uiManager.displayError(`Error al expandir la historia: ${error.message}`);
-                } finally {
-                    uiManager.displayLoading(uiManager.elements.expandStoryLoader, uiManager.elements.expandStoryBtn, false);
-                }
-            },
-
-            handleGenerateSheet: async function() {
-                uiManager.displayLoading(uiManager.elements.generationLoader, uiManager.elements.generateSheetBtn, true);
-                uiManager.elements.generatedImagesSection.classList.add('hidden'); // Ocultar resultados previos
-
-                try {
-                    const basePrompt = characterLogic.buildBasePrompt();
-                    
-                    const refinementInstruction = `Basado en la siguiente descripción detallada de un personaje, genera un prompt conciso y altamente efectivo para un modelo de generación de imágenes (como DALL-E, Midjourney o Imagen). El prompt debe capturar la esencia visual del personaje, su vestimenta, rasgos clave y el estilo artístico especificado. Enfócate en palabras clave visuales y descriptivas. No incluyas explicaciones, solo el prompt para la imagen.\n\nDescripción del Personaje:\n${basePrompt}`;
-                    
-                    let imagePrompt;
-                    try {
-                        imagePrompt = await apiService.generateTextWithGemini(refinementInstruction);
-                        uiManager.updatePromptPreview(`Prompt Base:\n${basePrompt}\n\nPrompt Optimizado para Imagen:\n${imagePrompt}`);
-                    } catch (textGenError) {
-                         console.warn("No se pudo refinar el prompt con IA, usando el prompt base.", textGenError);
-                         imagePrompt = basePrompt; 
-                         uiManager.updatePromptPreview(`Prompt Base (usado directamente):\n${basePrompt}\n\n(No se pudo optimizar el prompt con IA: ${textGenError.message})`);
-                    }
-
-                    const imageUrls = await apiService.generateImageWithImagen(imagePrompt, 4);
-                    uiManager.displayImages(imageUrls);
-
-                } catch (error) {
-                    uiManager.displayError(`Error en la generación de la ficha: ${error.message}`);
-                } finally {
-                    uiManager.displayLoading(uiManager.elements.generationLoader, uiManager.elements.generateSheetBtn, false);
-                }
-            }
-        };
-
-        document.addEventListener('DOMContentLoaded', () => {
-            main.init();
         });
+
+        // Initial Setup
+        document.addEventListener('DOMContentLoaded', () => {
+            // Tab functionality
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetTab = button.dataset.tab;
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('active', 'border-blue-500', 'text-blue-500', 'bg-blue-50');
+                        btn.classList.add('border-transparent', 'hover:text-slate-700', 'hover:border-slate-300');
+                    });
+                    button.classList.add('active', 'border-blue-500', 'text-blue-500', 'bg-blue-50');
+                    button.classList.remove('border-transparent', 'hover:text-slate-700', 'hover:border-slate-300');
+                    
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === `${targetTab}-tab`) {
+                            content.classList.add('active');
+                        }
+                    });
+                });
+            });
+
+            // Artistic Style Selector
+            artisticStyleSelector.addEventListener('click', (e) => {
+                if (e.target.classList.contains('art-style-card')) {
+                    artisticStyleSelector.querySelectorAll('.art-style-card').forEach(card => {
+                        card.classList.remove('selected', 'border-blue-500', 'shadow-md');
+                        card.classList.add('border-slate-300');
+                    });
+                    e.target.classList.add('selected', 'border-blue-500', 'shadow-md');
+                    e.target.classList.remove('border-slate-300');
+                    selectedArtStyleInput.value = e.target.dataset.style;
+                    updatePromptPreview();
+                }
+            });
+            
+            // Update prompt preview on negative prompt change
+            if (negativePromptsInput) {
+                negativePromptsInput.addEventListener('input', updatePromptPreview);
+            }
+
+            // Button event listeners
+            expandStoryBtn.addEventListener('click', handleExpandStory);
+            generateSheetBtn.addEventListener('click', handleGenerateSheet);
+            exportSheetBtn.addEventListener('click', handleExportSheet);
+            importSheetBtn.addEventListener('click', () => {
+                importSection.classList.toggle('hidden');
+            });
+            loadSheetBtn.addEventListener('click', handleImportSheet);
+
+            updatePromptPreview(); // Initial prompt preview
+        });
+
+        // --- Helper Functions ---
+        function showModal(modalId, title, message) {
+            document.getElementById(modalId + 'Title').textContent = title;
+            document.getElementById(modalId + 'Text').textContent = message;
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function showImagePreviewModal(imageUrl) {
+            document.getElementById('fullPreviewImage').src = imageUrl;
+            document.getElementById('imagePreviewModal').style.display = 'flex';
+        }
+        
+        function toggleButtonLoader(buttonElement, show) {
+            const loader = buttonElement.querySelector('.loader');
+            if (loader) {
+                loader.classList.toggle('hidden', !show);
+            }
+            buttonElement.disabled = show;
+        }
+
+        // --- Character Data Handling ---
+        function getCharacterData() {
+            const data = {};
+            charFields.forEach(id => {
+                if (charInputElements[id]) {
+                    data[id] = charInputElements[id].value;
+                }
+            });
+            data.selectedArtStyle = selectedArtStyleInput.value;
+            data.negativePrompts = negativePromptsInput.value;
+            return data;
+        }
+
+        function setCharacterData(data) {
+            charFields.forEach(id => {
+                if (charInputElements[id] && data[id] !== undefined) {
+                    charInputElements[id].value = data[id];
+                }
+            });
+            if (data.selectedArtStyle) {
+                selectedArtStyleInput.value = data.selectedArtStyle;
+                artisticStyleSelector.querySelectorAll('.art-style-card').forEach(card => {
+                    card.classList.remove('selected', 'border-blue-500', 'shadow-md');
+                    card.classList.add('border-slate-300');
+                    if (card.dataset.style === data.selectedArtStyle) {
+                        card.classList.add('selected', 'border-blue-500', 'shadow-md');
+                        card.classList.remove('border-slate-300');
+                    }
+                });
+            }
+            if (data.negativePrompts) {
+                negativePromptsInput.value = data.negativePrompts;
+            }
+            updatePromptPreview();
+            showModal('messageModal', 'Éxito', 'Ficha de personaje cargada correctamente.');
+        }
+
+        // --- Prompt Preview ---
+        function updatePromptPreview() {
+            const data = getCharacterData();
+            let previewText = `Personaje: ${data.charName || '[Nombre]'}\n`;
+            previewText += `Título/Apodo: ${data.charTitle || '[Título]'}\n`;
+            previewText += `Raza/Especie: ${data.charRace || '[Raza]'}\n`;
+            previewText += `Ocupación/Clase: ${data.charClass || '[Clase]'}\n\n`;
+            previewText += `Apariencia:\n`;
+            previewText += `  Altura: ${data.charHeight || '[Altura]'}\n`;
+            previewText += `  Peso/Complexión: ${data.charWeight || '[Peso/Complexión]'}\n`;
+            previewText += `  Rasgos Distintivos: ${data.charFeatures || '[Ninguno]'}\n`;
+            previewText += `  Vestimenta: ${data.charClothing || '[Ropa Típica]'}\n`;
+            previewText += `  Equipamiento: ${data.charEquipment || '[Ninguno]'}\n\n`;
+            previewText += `Personalidad:\n`;
+            previewText += `  Rasgos: ${data.charTraits || '[Rasgos]'}\n`;
+            previewText += `  Ideales: ${data.charIdeals || '[Ideales]'}\n`;
+            previewText += `  Defectos: ${data.charFlaws || '[Defectos]'}\n\n`;
+            previewText += `Estilo Artístico: ${selectedArtStyleInput.value}\n`;
+            if (data.negativePrompts) {
+                previewText += `Prompts Negativos: ${data.negativePrompts}\n`;
+            }
+            promptPreview.textContent = previewText;
+        }
+
+        // --- AI API Calls ---
+        async function callGeminiTextAPI(promptContent) {
+            const userApiKey = apiKeyInput.value.trim();
+            const apiKey = userApiKey || ""; // Use user-provided key or fallback for environment injection
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            
+            const payload = {
+                contents: [{ role: "user", parts: [{ text: promptContent }] }]
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('Error en API Gemini Text:', errorData);
+                    throw new Error(`Error de API: ${response.status} ${response.statusText}. ${errorData.error?.message || ''}`);
+                }
+                const result = await response.json();
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    return result.candidates[0].content.parts[0].text;
+                } else {
+                    console.error('Respuesta inesperada de API Gemini Text:', result);
+                    throw new Error('Respuesta inesperada o vacía de la API de texto.');
+                }
+            } catch (error) {
+                console.error('Error al llamar a Gemini Text API:', error);
+                showModal('messageModal', 'Error de IA', `No se pudo generar el texto: ${error.message}. Verifica tu clave API y la consola para más detalles.`);
+                return null;
+            }
+        }
+
+        async function callImagenAPI(promptContent, negativePromptText) {
+            const userApiKey = apiKeyInput.value.trim();
+            const apiKey = userApiKey || ""; // Use user-provided key or fallback
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+            
+            const payload = {
+                instances: [{ prompt: promptContent }],
+                parameters: { 
+                    sampleCount: 2, // Generate 2 images for variety
+                    negativePrompt: negativePromptText || "" // Add negative prompt if provided
+                }
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('Error en API Imagen:', errorData);
+                    throw new Error(`Error de API de imagen: ${response.status} ${response.statusText}. ${errorData.error?.message || ''}`);
+                }
+                const result = await response.json();
+                if (result.predictions && result.predictions.length > 0) {
+                    return result.predictions.map(p => p.bytesBase64Encoded);
+                } else {
+                     console.error('Respuesta inesperada de API Imagen:', result);
+                    throw new Error('Respuesta inesperada o vacía de la API de imagen.');
+                }
+            } catch (error) {
+                console.error('Error al llamar a Imagen API:', error);
+                showModal('messageModal', 'Error de IA', `No se pudieron generar las imágenes: ${error.message}. Verifica tu clave API y la consola para más detalles.`);
+                return null;
+            }
+        }
+
+        // --- Event Handlers ---
+        async function handleExpandStory() {
+            const currentStory = charInputElements.charBackground.value;
+            if (!currentStory.trim()) {
+                showModal('messageModal', 'Información Requerida', 'Por favor, escribe un resumen de la historia de fondo primero.');
+                return;
+            }
+            
+            toggleButtonLoader(expandStoryBtn, true);
+            const prompt = `Eres un escritor creativo. Expande la siguiente historia de fondo para un personaje de ficción. Hazla más detallada e interesante:\n\n"${currentStory}"`;
+            const expandedStory = await callGeminiTextAPI(prompt);
+            toggleButtonLoader(expandStoryBtn, false);
+
+            if (expandedStory) {
+                charInputElements.charBackground.value = expandedStory;
+                showModal('messageModal', 'Éxito', 'Historia expandida por la IA.');
+                updatePromptPreview();
+            }
+        }
+
+        async function handleGenerateSheet() {
+            const data = getCharacterData();
+            if (!data.charName || !data.charRace || !data.charClass) {
+                showModal('messageModal', 'Información Requerida', 'Por favor, completa al menos Nombre, Raza y Clase del personaje antes de generar imágenes.');
+                return;
+            }
+
+            toggleButtonLoader(generateSheetBtn, true);
+            generatedImagesSection.classList.remove('hidden');
+            imageThumbnailsContainer.innerHTML = '<div class="loader mx-auto my-4"></div><p class="w-full text-center text-slate-500">Generando imágenes, por favor espera...</p>'; // Show loader in image area
+            noImagesMessage.classList.add('hidden');
+
+            let imagePrompt = `Un personaje llamado ${data.charName}, ${data.charRace} ${data.charClass}. `;
+            imagePrompt += `Apariencia: ${data.charHeight}, ${data.charWeight}. ${data.charFeatures}. `;
+            imagePrompt += `Viste: ${data.charClothing}. Equipamiento: ${data.charEquipment}. `;
+            imagePrompt += `Personalidad principal: ${data.charTraits.split(',')[0] || 'misterioso'}. `; // Use first trait or default
+            imagePrompt += `Estilo artístico: ${data.selectedArtStyle}.`;
+            
+            const base64Images = await callImagenAPI(imagePrompt, data.negativePrompts);
+            toggleButtonLoader(generateSheetBtn, false);
+            imageThumbnailsContainer.innerHTML = ''; // Clear loader
+
+            if (base64Images && base64Images.length > 0) {
+                generatedImagesSection.classList.remove('hidden');
+                noImagesMessage.classList.add('hidden');
+                base64Images.forEach(base64String => {
+                    const img = document.createElement('img');
+                    img.src = `data:image/png;base64,${base64String}`;
+                    img.alt = `Imagen generada de ${data.charName}`;
+                    img.classList.add('rounded-md', 'shadow-sm', 'hover:shadow-lg', 'transition-shadow');
+                    img.onclick = () => showImagePreviewModal(img.src);
+                    imageThumbnailsContainer.appendChild(img);
+                });
+                showModal('messageModal', 'Éxito', 'Imágenes generadas. Haz clic en una miniatura para verla en grande.');
+            } else {
+                noImagesMessage.classList.remove('hidden');
+                if (!apiKeyInput.value.trim()) {
+                     showModal('messageModal', 'Imágenes no generadas', 'No se pudieron generar imágenes. Es posible que necesites una clave API de Google AI válida o que haya ocurrido un error. Revisa la consola.');
+                }
+            }
+        }
+
+        function handleExportSheet() {
+            const data = getCharacterData();
+            const jsonData = JSON.stringify(data, null, 2);
+            try {
+                navigator.clipboard.writeText(jsonData);
+                showModal('messageModal', 'Éxito', 'Ficha de personaje copiada al portapapeles como JSON.');
+            } catch (err) {
+                console.error('Error al copiar al portapapeles:', err);
+                // Fallback for older browsers or iframes without permission
+                const textArea = document.createElement("textarea");
+                textArea.value = jsonData;
+                textArea.style.position = "fixed"; //avoid scrolling to bottom
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showModal('messageModal', 'Éxito', 'Ficha de personaje copiada al portapapeles como JSON.');
+                } catch (errExec) {
+                    showModal('messageModal', 'Error', 'No se pudo copiar la ficha. Por favor, copia manualmente el contenido desde la consola.');
+                    console.log("JSON para copiar manualmente:", jsonData);
+                }
+                document.body.removeChild(textArea);
+            }
+        }
+
+        function handleImportSheet() {
+            const jsonData = importJsonTextarea.value;
+            if (!jsonData.trim()) {
+                showModal('messageModal', 'Error', 'El área de texto JSON está vacía.');
+                return;
+            }
+            try {
+                const data = JSON.parse(jsonData);
+                setCharacterData(data);
+                importJsonTextarea.value = ''; // Clear textarea after import
+                importSection.classList.add('hidden'); // Hide import section
+            } catch (error) {
+                console.error('Error al parsear JSON:', error);
+                showModal('messageModal', 'Error de Importación', `Formato JSON inválido: ${error.message}`);
+            }
+        }
+
     </script>
 </body>
 </html>
