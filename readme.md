@@ -1,117 +1,39 @@
-# **🌟 Creador de Fichas de Personaje con IA 🌟**
-
-¡Bienvenido al Creador de Fichas de Personaje con IA\! Desata tu imaginación y da vida a tus personajes como nunca antes. Esta innovadora herramienta está diseñada para transformar tus ideas y descripciones detalladas en impresionantes representaciones visuales generadas por inteligencia artificial. Ya sea para tus juegos de rol, novelas, cómics o cualquier proyecto creativo, prepárate para ver a tus héroes, villanos y todas las personalidades intermedias cobrar forma visual.
-
-## **✨ ¿Qué es el Creador de Fichas de Personaje con IA?**
-
-Es una aplicación web intuitiva y potente que te permite:
-
-1. **Definir meticulosamente** cada aspecto de tus personajes: desde su nombre, raza y trasfondo, hasta sus rasgos físicos, vestimenta, equipamiento y matices de personalidad.  
-2. **Aprovechar la IA** para expandir y enriquecer las historias de tus personajes, añadiendo profundidad y detalles inesperados.  
-3. **Generar automáticamente prompts optimizados** para la creación de imágenes, asegurando que tu visión se traduzca fielmente.  
-4. **Visualizar a tus personajes** con imágenes únicas y de alta calidad, generadas por la avanzada API Imagen de Google, en una variedad de estilos artísticos.
-
-¡Olvídate de las limitaciones del texto plano y sumérgete en una experiencia de creación de personajes verdaderamente visual\!
-
-## **🚀 Características Principales**
-
-* **Personalización Exhaustiva:** Define nombre, título, raza, ocupación, historia de fondo, altura, peso, rasgos distintivos, vestimenta, equipamiento, personalidad, ideales, defectos y hasta citas memorables.  
-* **Expansión de Historia con IA:** ¿Tienes una idea base para el trasfondo? Deja que la IA de Gemini la convierta en una narrativa más rica y detallada con solo un clic.  
-* **Optimización Inteligente de Prompts:** La aplicación utiliza la IA de Gemini para refinar tus descripciones y convertirlas en prompts de imagen altamente efectivos.  
-* **Generación de Imágenes Potenciada por IA:** Crea múltiples imágenes de tu personaje utilizando la potente API Imagen de Google (imagen-3.0-generate-002).  
-* **Selección de Estilo Artístico:** Elige entre diversos estilos visuales predefinidos (Arte Conceptual, Estilo Pixar, Cyberpunk, Anime) para que la estética de tu personaje sea exactamente como la imaginas.  
-* **Control con Prompts Negativos:** Guía a la IA añadiendo términos que deseas evitar en las imágenes generadas (ej. "borroso", "deformado", "múltiples cabezas").  
-* **Vista Previa del Prompt en Tiempo Real:** Observa cómo se construye el prompt base a medida que ingresas los detalles de tu personaje.  
-* **Interfaz de Usuario Intuitiva y Atractiva:** Diseño moderno y responsivo creado con Tailwind CSS y Font Awesome para una experiencia de usuario fluida y agradable.  
-* **Modal de Errores:** Notificaciones claras si algo no sale como se esperaba durante la generación.
-
-## **💡 ¿Cómo Funciona?**
-
-El proceso es mágico pero sencillo:
-
-1. **Tú Aportas la Esencia:** Rellenas los campos con todos los detalles que definen a tu personaje.  
-2. **La IA Textual Entra en Acción (Gemini):**  
-   * Si lo deseas, la IA puede expandir la historia de fondo que proporcionaste.  
-   * Luego, toma toda la descripción de tu personaje y la refina, creando un *prompt de imagen optimizado*. Este prompt está diseñado para comunicar de la manera más efectiva posible tu visión al modelo de generación de imágenes.  
-3. **La IA Visual Crea la Magia (Imagen de Google):**  
-   * El prompt optimizado se envía a la API Imagen.  
-   * ¡Voilà\! Recibes varias representaciones visuales de tu personaje, listas para inspirarte.
-
-## **🛠️ Tecnologías Utilizadas**
-
-Esta aplicación es una maravilla moderna construida con:
-
-* **HTML5:** Para la estructura fundamental.  
-* **Tailwind CSS:** Para un diseño estilizado, responsivo y personalizable rápidamente.  
-* **JavaScript (Vanilla JS, Modular):** Para toda la lógica de la aplicación, la interacción con el usuario y la comunicación con las APIs.  
-* **Font Awesome:** Para iconos nítidos y descriptivos.  
-* **Google Gemini API (gemini-2.0-flash):** Para la generación y refinamiento de texto (expansión de historia, optimización de prompts).  
-* **Google Imagen API (imagen-3.0-generate-002):** Para la generación de las imágenes de los personajes.
-
-## **🚀 Cómo Empezar (¡Es Fácil\!)**
-
-1. **Abre la Aplicación:** Simplemente descarga el archivo index.html (o el repositorio completo) y ábrelo en tu navegador web moderno favorito (Chrome, Firefox, Edge, Safari).  
-2. **Ingresa los Detalles del Personaje:** Navega por las pestañas "Información Básica", "Apariencia" y "Personalidad" y completa los campos. ¡Cuanto más detalle, más rica será la base para la IA\!  
-3. **✨ (Opcional) Expande la Historia:** Si tu historia de fondo es breve, haz clic en el botón "Expandir Historia" y observa cómo la IA la enriquece.  
-4. **🔑 (Opcional) Configura tu Clave API de Gemini:**  
-   * En la sección "Estilo Artístico y Configuración de IA", encontrarás un campo para tu clave API de Gemini.  
-   * Si utilizas modelos de Gemini que requieren una clave o si el entorno no la gestiona automáticamente para el modelo gratuito gemini-2.0-flash, puedes pegarla aquí.  
-   * Para la API Imagen (imagen-3.0-generate-002), la clave es gestionada por el entorno de Canvas y no necesitas ingresarla.  
-5. **🎨 Elige tu Estilo Artístico:** Selecciona uno de los estilos predefinidos que mejor se adapte a la visión de tu personaje.  
-6. **🚫 (Opcional) Añade Prompts Negativos:** Especifica qué elementos quieres que la IA evite en la imagen.  
-7. **🔮 ¡Genera la Magia\!** Haz clic en el botón "Generar Ficha de Personaje".  
-   * Verás indicadores de carga mientras la IA trabaja.  
-8. **🖼️ Admira tu Creación:** Las imágenes generadas aparecerán en la sección correspondiente. ¡Haz clic en las miniaturas para verlas en tamaño completo\! Si no estás satisfecho, ajusta los detalles y vuelve a generar.
-
-## **🧑‍💻 Para Desarrolladores y Contribuidores**
-
-¡Este proyecto es para la comunidad\! Si eres un desarrollador con ideas, ¡nos encantaría tu ayuda\!
-
-### **Configuración para Desarrollo Local**
-
-Dado que la aplicación es un único archivo index.html autocontenido que utiliza CDNs para Tailwind y Font Awesome, la configuración es mínima:
-
-1. Clona este repositorio (o descarga el index.html).  
-2. Abre index.html en tu navegador.  
-3. ¡Empieza a experimentar y codificar\!
-
-### **¿Cómo Contribuir?**
-
-1. **Haz un Fork** de este repositorio.  
-2. **Crea una Nueva Rama** para tu característica o corrección: git checkout \-b feature/MiNuevaCaracteristicaAsombrosa o git checkout \-b fix/UnBugMolesto.  
-3. **Implementa tus Cambios:** ¡Escribe ese código genial\!  
-4. **Haz Commit** de tus cambios con mensajes descriptivos: git commit \-m 'feat: Añade nuevo estilo artístico Steampunk' (Considera usar [Conventional Commits](https://www.conventionalcommits.org/)).  
-5. **Haz Push** a tu rama: git push origin feature/MiNuevaCaracteristicaAsombrosa.  
-6. **Abre un Pull Request** detallando tus cambios.
-
-### **Áreas Potenciales para Contribuir:**
-
-* **Nuevos Estilos Artísticos:** ¿Tienes en mente un estilo que falta?  
-* **Guardar/Cargar Fichas:** Permitir a los usuarios guardar sus personajes y volver a cargarlos.  
-* **Exportar a PDF/Imagen:** Generar una ficha de personaje completa para descargar.  
-* **Más Opciones de Personalización de IA:** Control más granular sobre los parámetros de generación.  
-* **Mejoras en la UI/UX:** ¿Ideas para hacerla aún más intuitiva?  
-* **Traducciones/Localización:** Adaptar la aplicación a más idiomas.  
-* **Pruebas:** Añadir pruebas unitarias o E2E.
-
-## **🗺️ Hoja de Ruta Futura (Sueños y Planes)**
-
-* Integración con más modelos de IA para texto e imagen.  
-* Sistema de plantillas de personajes.  
-* Comunidad para compartir personajes creados (con consentimiento).  
-* Herramientas avanzadas de edición de prompts.
-
-## **📄 Licencia**
-
-Este proyecto está licenciado bajo la **Licencia MIT**. Consulta el archivo LICENSE (si se añade uno, o se puede declarar aquí directamente) para más detalles.  
-El código fuente de esta aplicación se proporciona bajo la Licencia MIT. Eres libre de usar, copiar, modificar, fusionar, publicar, distribuir, sublicenciar y/o vender copias del Software, sujeto a las siguientes condiciones: La anterior nota de copyright y esta nota de permiso se incluirán en todas las copias o porciones sustanciales del Software. EL SOFTWARE SE PROPORCIONA "TAL CUAL", SIN GARANTÍA DE NINGÚN TIPO, EXPRESA O IMPLÍCITA, INCLUYENDO PERO NO LIMITADO A GARANTÍAS DE COMERCIABILIDAD, IDONEIDAD PARA UN PROPÓSITO PARTICULAR Y NO INFRACCIÓN. EN NINGÚN CASO LOS AUTORES O TITULARES DEL COPYRIGHT SERÁN RESPONSABLES DE NINGUNA RECLAMACIÓN, DAÑO U OTRA RESPONSABILIDAD, YA SEA EN UNA ACCIÓN DE CONTRATO, AGRAVIO O CUALQUIER OTRO MOTIVO, QUE SURJA DE, FUERA DE O EN CONEXIÓN CON EL SOFTWARE O EL USO U OTROS TRATOS EN EL SOFTWARE.
-
-## **💬 Contacto y Agradecimientos**
-
-Este proyecto fue creado con pasión por la creatividad y la inteligencia artificial.
-
-* **Inspirado en la idea original y la necesidad de visualizar personajes de forma sencilla.**  
-* **Agradecimientos especiales a las comunidades de desarrollo y a los creadores de las APIs de Google (Gemini e Imagen) por hacer posible esta magia.**
-
-Si tienes preguntas, sugerencias o simplemente quieres compartir tus creaciones, ¡no dudes en abrir un "Issue" en el repositorio\!  
-**¡Crea, imagina y da vida a tus personajes\!**
+✨ Creador de Fitxes de Personatge amb IA ✨
+Benvingut al Creador de Fitxes de Personatge amb IA! 🚀 Aquesta és la teva eina definitiva per donar vida als teus personatges de ficció, ja sigui per a jocs de rol, històries, novel·les o qualsevol univers creatiu que estiguis construint. Oblida't de les fulles de paper avorrides i submergeix-te en una experiència interactiva i visualment impactant, potenciada per la intel·ligència artificial. 🧠🎨
+🌟 Què és i Per Què l'Estimaràs?
+Aquest programa és més que un simple formulari; és un company creatiu que t'ajuda a definir cada faceta dels teus personatges, des de la seva història de fons més profunda fins a la seva aparença més detallada. I el millor de tot: pot generar imatges sorprenents de les teves creacions amb només un clic! 🖼️✨
+Característiques Destacades:
+Definició Detallada de Personatges: Crea una fitxa completa amb informació bàsica, aparença i personalitat. 📝
+Expansió d'Història amb IA: Bloc d'escriptor? Deixa que la IA t'ajudi a expandir i enriquir la història de fons del teu personatge amb només un botó. 💡
+Generació d'Imatges Impressionants: Visualitza els teus personatges amb l'ajuda de la IA de generació d'imatges, triant entre una varietat d'estils artístics (Concept Art, Animació Pixar, Cyberpunk i més). 🌈
+Vista Prèvia de Prompt Dinàmica: Observa en temps real com les teves entrades es transformen en el "prompt" que la IA utilitzarà per generar el text i les imatges. 🔍
+Exportació i Importació de Fitxes: Guarda i carrega els teus personatges en format JSON per editar-los més tard o compartir-los amb amics. 💾📤📥
+¡Exportació Completa a ZIP! Guarda tota la informació del teu personatge, incloent la fitxa en format Markdown (.md) i totes les imatges generades, en un pràctic arxiu ZIP. ¡Perfecte per arxivar o compartir la teva creació completa! 📦
+Interfície Intuïtiva i Responsiva: Dissenyada amb Tailwind CSS per a una experiència d'usuari fluida en qualsevol dispositiu. 📱💻
+💖 ¡Dona Vida a les Teves Idees!
+Imagina això: tens una idea per a un heroi espacial, un elf místic o un detectiu d'un futur distòpic. Amb aquesta aplicació, pots començar amb una idea bàsica, deixar que la IA t'inspiri amb una història més rica i, en qüestió de segons, ¡tenir una representació visual del teu personatge en l'estil artístic que triïs! És la fusió perfecta entre la teva creativitat i el poder de la intel·ligència artificial. 🌟🚀
+🛠️ Com Usar
+Navega per les Pestanyes: Omple la informació del teu personatge a les pestanyes "Informació Bàsica", "Aparença" i "Personalitat". ➡️
+Expandeix la teva Història (Opcional): Si tens una idea per a la història de fons, escriu-la al camp corresponent i fes clic a "✨ Expandir Història amb IA" per obtenir una versió més detallada. ✍️
+Configura la IA:
+Clau API: Si tens una clau API de Google AI (Gemini), introdueix-la al camp "Clau API de Google AI". Això millora la capacitat de la IA. 🔑
+Estil Artístic: Selecciona l'estil visual que desitges per a les imatges del teu personatge. 🎨
+Prompts Negatius: Afegeix paraules clau de coses que no vols veure a les teves imatges (ex: "borrós", "deformat"). 🚫
+Genera el teu Personatge: Fes clic a "🔮 Generar Fitxa de Personatge (i Imatges)". L'aplicació utilitzarà la informació que has proporcionat per crear un prompt i generar dues imatges del teu personatge. 🚀
+Visualitza les Imatges: Les imatges generades apareixeran a la secció "Imatges Generades". Pots fer clic en elles per veure una vista prèvia més gran. 👁️‍🗨️
+Exporta la teva Creació:
+Fes clic a "📤 Exportar Fitxa (JSON)" per guardar només les dades del formulari.
+Fes clic a "📦 Exportar a ZIP" per descarregar un arxiu ZIP que conté la fitxa en Markdown i totes les imatges generades. ✅
+Importa les teves Fitxes: Si tens un arxiu JSON d'una fitxa anterior, pots utilitzar "📥 Importar Fitxa", enganxar el contingut i fer clic a "Carregar Fitxa". 📂
+💻 Tecnologies Utilitzades
+HTML5: Estructura de l'aplicació. 🌐
+Tailwind CSS: Estils moderns i responsius. 💅
+JavaScript (Vanilla JS): Lògica interactiva del frontend. 💡
+Google AI Gemini API: Per a l'expansió de text (història de fons). ✍️
+Google Imagen API (imagen-3.0-generate-002): Per a la generació d'imatges. 🖼️
+JSZip: Per a la creació d'arxius ZIP al navegador. 🗜️
+FileSaver.js: Per facilitar la descàrrega d'arxius generats. ⬇️
+❤️‍🔥 ¡La Teva Creativitat, Potenciada!
+Aquesta eina està dissenyada per encendre la teva imaginació i simplificar el procés de creació de personatges. ¡Esperem que gaudeixis utilitzant-la tant com nosaltres vam gaudir creant-la! 🎉
+📄 Llicència
+Aquest projecte es distribueix sota la llicència MIT. Consulta l'arxiu LICENSE per a més detalls. 📜
