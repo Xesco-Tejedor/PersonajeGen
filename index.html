@@ -6,6 +6,10 @@
     <title>AI Character Sheet Creator</title>
     <link rel="icon" href="assets/frankenstein.png" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- JSZip for creating ZIP files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- FileSaver.js for saving files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
         /* Custom scrollbar for webkit browsers */
         ::-webkit-scrollbar {
@@ -221,8 +225,9 @@
                     <span class="loader hidden mr-2"></span>✨ Expandir Historia con IA
                 </button>
 
-                <div class="mt-8 pt-6 border-t border-slate-200 space-x-0 space-y-3 md:space-x-3 md:space-y-0">
-                    <button id="exportSheetBtn" class="btn btn-secondary w-full md:w-auto">📤 Exportar Ficha</button>
+                <div class="mt-8 pt-6 border-t border-slate-200 space-x-0 space-y-3 md:space-x-3 md:space-y-0 flex flex-wrap items-center justify-start">
+                    <button id="exportSheetBtn" class="btn btn-secondary w-full md:w-auto">📤 Exportar Ficha (JSON)</button>
+                    <button id="exportZipBtn" class="btn btn-primary w-full md:w-auto">📦 Exportar a ZIP</button> <!-- New button -->
                     <button id="importSheetBtn" class="btn btn-secondary w-full md:w-auto">📥 Importar Ficha</button>
                 </div>
                 <div id="importSection" class="hidden mt-4 space-y-3">
@@ -285,7 +290,8 @@
             <div class="space-y-6">
                 <div>
                     <label for="apiKey" class="block text-sm font-medium text-slate-700 mb-1">Clave API de Google AI (Gemini) (Opcional):</label>
-                    <input type="password" id="apiKey" class="form-input" placeholder="Pega tu clave API aquí si la tienes" value="AIzaSyBqV7GAinY7BE1mxj16_f_mMIP1ADBri9o">                    <p class="text-xs text-slate-500 mt-1">Si no proporcionas una clave, las funciones de IA podrían tener limitaciones o no funcionar.</p>
+                    <input type="password" id="apiKey" class="form-input" placeholder="Pega tu clave API aquí si la tienes" value="AIzaSyBqV7GAinY7BE1mxj16_f_mMIP1ADBri9o">
+                    <p class="text-xs text-slate-500 mt-1">Si no proporcionas una clave, las funciones de IA podrían tener limitaciones o no funcionar.</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-2">Selecciona un Estilo Artístico para la Imagen:</label>
@@ -349,12 +355,15 @@
     <!-- Image Preview Modal -->
     <div id="imagePreviewModal" class="modal" onclick="closeModal('imagePreviewModal')">
         <div class="modal-content p-2 bg-transparent shadow-none max-w-max max-h-max" onclick="event.stopPropagation();">
-             <span class="modal-close text-white bg-black bg-opacity-50 rounded-full p-1 leading-none text-2xl -mr-3 -mt-3" onclick="closeModal('imagePreviewModal')">&times;</span>
+               <span class="modal-close text-white bg-black bg-opacity-50 rounded-full p-1 leading-none text-2xl -mr-3 -mt-3" onclick="closeModal('imagePreviewModal')">&times;</span>
             <img id="fullPreviewImage" src="https://placehold.co/600x400/E2E8F0/4A5568?text=Preview" alt="Image Preview" class="rounded-lg">
         </div>
     </div>
 
     <script>
+        // Global variable to store generated image base64 data
+        let currentGeneratedImages = [];
+
         // DOM Elements
         const tabButtons = document.querySelectorAll('.tab-button');
         const tabContents = document.querySelectorAll('.tab-content');
@@ -370,6 +379,7 @@
         const noImagesMessage = document.getElementById('noImagesMessage');
         
         const exportSheetBtn = document.getElementById('exportSheetBtn');
+        const exportZipBtn = document.getElementById('exportZipBtn'); // New button element
         const importSheetBtn = document.getElementById('importSheetBtn');
         const importSection = document.getElementById('importSection');
         const importJsonTextarea = document.getElementById('importJson');
@@ -434,6 +444,7 @@
             expandStoryBtn.addEventListener('click', handleExpandStory);
             generateSheetBtn.addEventListener('click', handleGenerateSheet);
             exportSheetBtn.addEventListener('click', handleExportSheet);
+            exportZipBtn.addEventListener('click', handleExportZip); // Event listener for new button
             importSheetBtn.addEventListener('click', () => {
                 importSection.classList.toggle('hidden');
             });
@@ -631,82 +642,114 @@
 
             toggleButtonLoader(generateSheetBtn, true);
             generatedImagesSection.classList.remove('hidden');
-            imageThumbnailsContainer.innerHTML = '<div class="loader mx-auto my-4"></div><p class="w-full text-center text-slate-500">Generando imágenes, por favor espera...</p>'; // Show loader in image area
+            imageThumbnailsContainer.innerHTML = '<div class="loader mx-auto my-4"></div><p class="w-full text-center text-slate-500">Generando imágenes...</p>';
             noImagesMessage.classList.add('hidden');
+            currentGeneratedImages = []; // Clear previous images
 
-            let imagePrompt = `Un personaje llamado ${data.charName}, ${data.charRace} ${data.charClass}. `;
-            imagePrompt += `Apariencia: ${data.charHeight}, ${data.charWeight}. ${data.charFeatures}. `;
-            imagePrompt += `Viste: ${data.charClothing}. Equipamiento: ${data.charEquipment}. `;
-            imagePrompt += `Personalidad principal: ${data.charTraits.split(',')[0] || 'misterioso'}. `; // Use first trait or default
-            imagePrompt += `Estilo artístico: ${data.selectedArtStyle}.`;
-            
-            const base64Images = await callImagenAPI(imagePrompt, data.negativePrompts);
+            const prompt = promptPreview.textContent; // Use the full prompt preview for image generation
+            const negativePrompts = negativePromptsInput.value.trim();
+
+            const imagesBase64 = await callImagenAPI(prompt, negativePrompts);
             toggleButtonLoader(generateSheetBtn, false);
-            imageThumbnailsContainer.innerHTML = ''; // Clear loader
 
-            if (base64Images && base64Images.length > 0) {
-                generatedImagesSection.classList.remove('hidden');
-                noImagesMessage.classList.add('hidden');
-                base64Images.forEach(base64String => {
+            imageThumbnailsContainer.innerHTML = ''; // Clear loader and message
+            if (imagesBase64 && imagesBase64.length > 0) {
+                currentGeneratedImages = imagesBase64; // Store generated images
+                imagesBase64.forEach((base64Data, index) => {
+                    const imageUrl = `data:image/png;base64,${base64Data}`;
                     const img = document.createElement('img');
-                    img.src = `data:image/png;base64,${base64String}`;
-                    img.alt = `Imagen generada de ${data.charName}`;
-                    img.classList.add('rounded-md', 'shadow-sm', 'hover:shadow-lg', 'transition-shadow');
-                    img.onclick = () => showImagePreviewModal(img.src);
+                    img.src = imageUrl;
+                    img.alt = `Generated Character Image ${index + 1}`;
+                    img.classList.add('hover:scale-105', 'transform', 'transition-transform');
+                    img.onclick = () => showImagePreviewModal(imageUrl);
                     imageThumbnailsContainer.appendChild(img);
                 });
-                showModal('messageModal', 'Éxito', 'Imágenes generadas. Haz clic en una miniatura para verla en grande.');
+                showModal('messageModal', 'Éxito', 'Imágenes de personaje generadas correctamente.');
             } else {
                 noImagesMessage.classList.remove('hidden');
-                if (!apiKeyInput.value.trim()) {
-                     showModal('messageModal', 'Imágenes no generadas', 'No se pudieron generar imágenes. Es posible que necesites una clave API de Google AI válida o que haya ocurrido un error. Revisa la consola.');
-                }
+                showModal('messageModal', 'Error', 'No se pudieron generar imágenes. Inténtalo de nuevo o ajusta los parámetros.');
             }
         }
 
         function handleExportSheet() {
             const data = getCharacterData();
-            const jsonData = JSON.stringify(data, null, 2);
+            const filename = `${data.charName || 'personaje'}_ficha.json`;
+            const jsonString = JSON.stringify(data, null, 2);
+            
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            saveAs(blob, filename);
+            showModal('messageModal', 'Exportar Ficha', `Ficha de personaje exportada como "${filename}".`);
+        }
+
+        async function handleExportZip() {
+            const data = getCharacterData();
+            const charName = data.charName || 'personaje_desconocido';
+            const zip = new JSZip();
+
+            // 1. Add Markdown file
+            let markdownContent = `# Ficha de Personaje: ${data.charName || 'Sin Nombre'}\n\n`;
+            markdownContent += `## Información Básica\n`;
+            markdownContent += `- **Nombre:** ${data.charName || 'N/A'}\n`;
+            markdownContent += `- **Título/Apodo:** ${data.charTitle || 'N/A'}\n`;
+            markdownContent += `- **Raza/Especie:** ${data.charRace || 'N/A'}\n`;
+            markdownContent += `- **Ocupación/Clase:** ${data.charClass || 'N/A'}\n`;
+            markdownContent += `- **Historia de Fondo:**\n${data.charBackground ? data.charBackground.split('\n').map(line => `  ${line}`).join('\n') : '  N/A'}\n\n`;
+
+            markdownContent += `## Apariencia\n`;
+            markdownContent += `- **Altura:** ${data.charHeight || 'N/A'}\n`;
+            markdownContent += `- **Peso/Complexión:** ${data.charWeight || 'N/A'}\n`;
+            markdownContent += `- **Rasgos Distintivos:** ${data.charFeatures || 'N/A'}\n`;
+            markdownContent += `- **Vestimenta Típica:** ${data.charClothing || 'N/A'}\n`;
+            markdownContent += `- **Equipamiento/Accesorios:** ${data.charEquipment || 'N/A'}\n\n`;
+
+            markdownContent += `## Personalidad\n`;
+            markdownContent += `- **Rasgos de Personalidad:** ${data.charTraits || 'N/A'}\n`;
+            markdownContent += `- **Ideales:** ${data.charIdeals || 'N/A'}\n`;
+            markdownContent += `- **Defectos/Debilidades:** ${data.charFlaws || 'N/A'}\n`;
+            markdownContent += `- **Citas Memorables:**\n${data.charQuotes ? data.charQuotes.split('\n').map(line => `  "${line}"`).join('\n') : '  N/A'}\n\n`;
+
+            markdownContent += `## Configuración de IA Utilizada\n`;
+            markdownContent += `- **Estilo Artístico Seleccionado:** ${data.selectedArtStyle || 'N/A'}\n`;
+            markdownContent += `- **Prompts Negativos:** ${data.negativePrompts || 'N/A'}\n`;
+
+            zip.file(`${charName}_ficha.md`, markdownContent);
+
+            // 2. Add Images
+            if (currentGeneratedImages.length > 0) {
+                currentGeneratedImages.forEach((base64Data, index) => {
+                    // Remove the "data:image/png;base64," prefix
+                    const base64ImageContent = base64Data.split(',')[1];
+                    zip.file(`${charName}_imagen_${index + 1}.png`, base64ImageContent, { base64: true });
+                });
+            } else {
+                showModal('messageModal', 'Advertencia', 'No hay imágenes generadas para exportar en el ZIP. Solo se exportará la ficha.');
+            }
+
+            // 3. Generate and download the ZIP file
+            toggleButtonLoader(exportZipBtn, true);
             try {
-                navigator.clipboard.writeText(jsonData);
-                showModal('messageModal', 'Éxito', 'Ficha de personaje copiada al portapapeles como JSON.');
-            } catch (err) {
-                console.error('Error al copiar al portapapeles:', err);
-                // Fallback for older browsers or iframes without permission
-                const textArea = document.createElement("textarea");
-                textArea.value = jsonData;
-                textArea.style.position = "fixed"; //avoid scrolling to bottom
-                document.body.appendChild(textArea);
-                textArea.focus();
-                textArea.select();
-                try {
-                    document.execCommand('copy');
-                    showModal('messageModal', 'Éxito', 'Ficha de personaje copiada al portapapeles como JSON.');
-                } catch (errExec) {
-                    showModal('messageModal', 'Error', 'No se pudo copiar la ficha. Por favor, copia manualmente el contenido desde la consola.');
-                    console.log("JSON para copiar manualmente:", jsonData);
-                }
-                document.body.removeChild(textArea);
+                const content = await zip.generateAsync({ type: "blob" });
+                saveAs(content, `${charName}_datos.zip`);
+                showModal('messageModal', 'Exportar a ZIP', `Datos del personaje exportados como "${charName}_datos.zip".`);
+            } catch (error) {
+                console.error('Error al generar el archivo ZIP:', error);
+                showModal('messageModal', 'Error', `No se pudo generar el archivo ZIP: ${error.message}.`);
+            } finally {
+                toggleButtonLoader(exportZipBtn, false);
             }
         }
 
         function handleImportSheet() {
-            const jsonData = importJsonTextarea.value;
-            if (!jsonData.trim()) {
-                showModal('messageModal', 'Error', 'El área de texto JSON está vacía.');
-                return;
-            }
             try {
-                const data = JSON.parse(jsonData);
-                setCharacterData(data);
-                importJsonTextarea.value = ''; // Clear textarea after import
-                importSection.classList.add('hidden'); // Hide import section
+                const jsonString = importJsonTextarea.value;
+                const importedData = JSON.parse(jsonString);
+                setCharacterData(importedData);
+                importSection.classList.add('hidden'); // Hide import section after loading
             } catch (error) {
-                console.error('Error al parsear JSON:', error);
-                showModal('messageModal', 'Error de Importación', `Formato JSON inválido: ${error.message}`);
+                showModal('messageModal', 'Error de Importación', `Error al parsear el JSON: ${error.message}. Asegúrate de que el formato sea correcto.`);
+                console.error('Error importing sheet:', error);
             }
         }
-
     </script>
 </body>
 </html>
