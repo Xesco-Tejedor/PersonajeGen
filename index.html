@@ -594,44 +594,47 @@
             }
         }
 
-        async function callImagenAPI(promptContent) {
-            const currentApiKey = UIElements.apiKey ? UIElements.apiKey.value.trim() : '';
-            if (!currentApiKey) {
-                showModal('messageModal', 'Error de Configuración', 'Por favor, ingresa tu PROPIA Clave API de Google AI.');
-                return null;
-            }
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${currentApiKey}`;
-            const payload = {
-                contents: [{ parts: [{ text: promptContent }] }]
-            };
+// REEMPLAZA TEMPORALMENTE TU FUNCIÓN callImagenAPI POR ESTA:
+async function callImagenAPI(promptContent) {
+    const currentApiKey = UIElements.apiKey ? UIElements.apiKey.value.trim() : '';
+    if (!currentApiKey) {
+        showModal('messageModal', 'Error de Configuración', 'Por favor, ingresa tu PROPIA Clave API de Google AI.');
+        return null;
+    }
+    
+    // Usamos un prompt de prueba simple y directo
+    const testPrompt = "Un retrato fotorrealista de un gato azul con un sombrero pequeño";
+    console.log("--- INICIANDO PRUEBA DE AISLAMIENTO ---");
+    console.log("Usando prompt de prueba fijo:", testPrompt);
 
-            console.log("Llamando a Gemini 1.5 Flash para generar imagen...");
-            console.log("Prompt Enviado:", promptContent);
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${currentApiKey}`;
+    const payload = {
+        contents: [{ parts: [{ text: testPrompt }] }]
+    };
 
-            try {
-                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                const result = await response.json();
+    try {
+        const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const result = await response.json();
 
-                if (!response.ok) {
-                    const errorDetails = result.error?.message || JSON.stringify(result.error);
-                    throw new Error(`Error de API Gemini (Imagen): ${response.status} ${response.statusText}. Detalles: ${errorDetails}`);
-                }
-                
-                if (result.candidates && result.candidates[0].content.parts[0].inlineData?.data) {
-                    console.log("Imagen recibida exitosamente de Gemini.");
-                    return [result.candidates[0].content.parts[0].inlineData.data];
-                } else if (result.candidates && result.candidates[0].finishReason !== 'STOP') {
-                    throw new Error(`La generación de la imagen fue detenida. Motivo: ${result.candidates[0].finishReason}. Revisa el prompt por posibles problemas de seguridad.`);
-                } else {
-                    console.error('Respuesta inesperada de Gemini API:', result);
-                    throw new Error('Respuesta inesperada o predicciones vacías de la API de Gemini (Imagen).');
-                }
-            } catch (error) {
-                console.error('Error final en callImagenAPI:', error);
-                showModal('messageModal', 'Error de IA (Imagen)', `No se pudieron generar imágenes: ${error.message}.`);
-                return null;
-            }
+        if (!response.ok) {
+            const errorDetails = result.error?.message || JSON.stringify(result.error);
+            throw new Error(`Error de API Gemini (Imagen): ${response.status} ${response.statusText}. Detalles: ${errorDetails}`);
         }
+        
+        if (result.candidates && result.candidates[0].content.parts[0].inlineData?.data) {
+            console.log("¡PRUEBA SUPERADA! Imagen recibida de Gemini.");
+            showModal('messageModal', '¡Éxito en la Prueba!', 'La API ha generado una imagen con el prompt de prueba. El problema podría estar en los datos de tu personaje.');
+            return [result.candidates[0].content.parts[0].inlineData.data];
+        } else {
+            console.error('Respuesta inesperada de Gemini API en modo de prueba:', result);
+            throw new Error('Respuesta inesperada o predicciones vacías de la API de Gemini (Imagen).');
+        }
+    } catch (error) {
+        console.error('Error final en callImagenAPI (modo de prueba):', error);
+        showModal('messageModal', 'Error de IA (Imagen)', `No se pudieron generar imágenes: ${error.message}.`);
+        return null;
+    }
+}
 
         async function handleExpandStory() {
             if(!UIElements.expandStoryBtn) return;
