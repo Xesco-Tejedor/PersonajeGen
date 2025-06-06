@@ -6,202 +6,110 @@
     <title>AI Character Sheet Creator</title>
     <link rel="icon" href="assets/frankenstein.png" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- JSZip for creating ZIP files -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <!-- FileSaver.js for saving files -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* Custom scrollbar for webkit browsers */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
+        /* Custom scrollbar para un look más limpio */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+        
+        body { font-family: 'Inter', sans-serif; }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5; /* Light gray background */
-        }
         .tab-button {
-            transition: all 0.3s ease-in-out;
+            transition: all 0.2s ease-in-out;
+            @apply font-medium text-slate-500 border-b-2 border-transparent hover:text-indigo-600 hover:border-indigo-300 px-4 py-3;
         }
-        .tab-button.active {
-            border-color: #3b82f6; /* Blue-500 */
-            color: #3b82f6;
-            background-color: #eff6ff; /* Blue-50 */
-        }
-        .tab-content {
-            display: none;
-        }
-        .tab-content.active {
-            display: block;
-        }
+        .tab-button.active { @apply border-indigo-600 text-indigo-600; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
         .art-style-card {
-            transition: all 0.3s ease-in-out;
-            cursor: pointer;
-        }
-        .art-style-card.selected {
-            border-color: #3b82f6; /* Blue-500 */
-            box-shadow: 0 0 0 2px #3b82f6;
-            transform: translateY(-2px);
-        }
-        .form-input, .form-textarea {
-            border-radius: 0.375rem; /* rounded-md */
-            border: 1px solid #d1d5db; /* gray-300 */
-            padding: 0.5rem 0.75rem;
-            width: 100%;
-            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        }
-        .form-input:focus, .form-textarea:focus {
-            border-color: #3b82f6; /* Blue-500 */
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
-            outline: none;
-        }
-        .btn {
-            padding: 0.625rem 1.25rem;
-            border-radius: 0.375rem; /* rounded-md */
-            font-weight: 500;
             transition: all 0.2s ease-in-out;
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+            @apply border border-slate-200 rounded-lg text-center bg-white p-4 hover:shadow-md hover:border-indigo-400 hover:-translate-y-1;
         }
-        .btn-primary {
-            background-color: #3b82f6; /* Blue-500 */
-            color: white;
-        }
-        .btn-primary:hover {
-            background-color: #2563eb; /* Blue-600 */
-        }
-        .btn-secondary {
-            background-color: #6b7280; /* Gray-500 */
-            color: white;
-        }
-        .btn-secondary:hover {
-            background-color: #4b5563; /* Gray-600 */
-        }
-        .btn-outline {
-            background-color: transparent;
-            color: #3b82f6; /* Blue-500 */
-            border: 1px solid #3b82f6;
-        }
-        .btn-outline:hover {
-            background-color: #eff6ff; /* Blue-50 */
-        }
-        .section-title {
-            font-size: 1.25rem; /* text-xl */
-            font-weight: 600; /* font-semibold */
-            color: #1f2937; /* gray-800 */
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #e5e7eb; /* gray-200 */
-        }
+        .art-style-card.selected { @apply border-indigo-500 shadow-lg -translate-y-1 ring-2 ring-offset-2 ring-indigo-500; }
+        
+        .form-input, .form-textarea { @apply rounded-lg border-slate-300 p-2.5 w-full transition duration-200 ease-in-out bg-slate-50/50; }
+        .form-input:focus, .form-textarea:focus { @apply border-indigo-400 ring-2 ring-indigo-200 outline-none; }
+        
+        .btn { @apply px-5 py-2.5 rounded-lg font-semibold transition duration-200 ease-in-out cursor-pointer inline-flex items-center justify-center text-sm shadow-sm; }
+        .btn:disabled { @apply opacity-60 cursor-not-allowed bg-slate-400; }
+        
+        .btn-primary { @apply bg-indigo-600 text-white hover:bg-indigo-700; }
+        .btn-secondary { @apply bg-slate-600 text-white hover:bg-slate-700; }
+        .btn-outline { @apply bg-transparent text-indigo-600 border border-indigo-500 hover:bg-indigo-50; }
+
+        .section-title { @apply text-2xl font-bold text-slate-800 mb-6 pb-3 border-b border-slate-200; }
+
         .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.5);
-            align-items: center;
-            justify-content: center;
+            display: none; position: fixed; z-index: 1000; left: 0; top: 0;
+            width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5);
+            @apply flex items-center justify-center p-4;
         }
         .modal-content {
             background-color: #fff;
-            margin: auto;
-            padding: 20px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            position: relative;
+            @apply rounded-lg shadow-xl p-6 relative w-full max-w-md mx-auto;
+            animation: fadeIn 0.3s ease-out;
         }
-        .modal-close {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 24px;
-            font-weight: bold;
-            cursor: pointer;
-            color: #888;
-        }
-        .modal-close:hover {
-            color: #000;
-        }
-        .thumbnail-container img {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            margin: 5px;
-            border-radius: 4px;
-            cursor: pointer;
-            border: 2px solid transparent;
-        }
-        .thumbnail-container img:hover {
-            border-color: #3b82f6;
-        }
-        #imagePreviewModal img {
-            max-width: 90vw;
-            max-height: 80vh;
-            border-radius: 8px;
-        }
+        .modal-close { @apply absolute top-3 right-4 text-3xl font-light cursor-pointer text-slate-400 hover:text-slate-800; }
+
+        .thumbnail-container img { @apply w-24 h-24 object-cover rounded-lg cursor-pointer border-2 border-transparent transition duration-200 ease-in-out hover:border-indigo-500 hover:shadow-md; }
+        
+        #imagePreviewModal .modal-content { @apply bg-transparent shadow-none max-w-4xl max-h-full p-2; }
+        #imagePreviewModal img { @apply max-w-[90vw] max-h-[85vh] rounded-lg shadow-2xl; }
+        #imagePreviewModal .modal-close { @apply text-white bg-black bg-opacity-50 rounded-full p-1 leading-none text-3xl -mr-2 -mt-2; }
+
         .loader {
-            border: 4px solid #f3f3f3; /* Light grey */
-            border-top: 4px solid #3b82f6; /* Blue */
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
+            border: 4px solid #f3f3f3; border-top: 4px solid #4f46e5; border-radius: 50%;
+            width: 24px; height: 24px; animation: spin 1s linear infinite;
+            display: inline-block; vertical-align: middle; margin-right: 8px;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .hidden { display: none; }
+
+        .model-sheet-view {
+            @apply border border-slate-200 p-4 rounded-lg text-center bg-white shadow-sm flex flex-col items-center justify-between transition hover:shadow-md;
+            min-height: 220px;
         }
-        .hidden {
-            display: none;
+        .model-sheet-view h3 { @apply font-semibold text-slate-700 text-base mb-2; }
+        .model-sheet-view img { @apply max-w-[140px] max-h-[140px] object-contain rounded-md block mx-auto flex-grow mb-2; }
+        .model-sheet-view .loader { @apply mx-auto my-4; }
+        .model-sheet-view p.text-xs { @apply text-slate-500 mt-auto; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        #dragDropOverlay.drag-over > div {
+            @apply border-4 border-dashed border-indigo-400;
         }
     </style>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-slate-100 text-slate-800 p-4 md:p-8">
+<body class="bg-slate-100 text-slate-700 p-4 sm:p-6 md:p-8">
 
-    <div class="container mx-auto max-w-5xl bg-white p-6 md:p-8 rounded-lg shadow-xl">
-        <header class="mb-8 text-center">
-            <h1 class="text-3xl md:text-4xl font-bold text-blue-600">Creador de Fichas de Personaje con IA</h1>
-            <p class="text-slate-600 mt-2">Define, desarrolla y visualiza tus personajes.</p>
+    <div class="container relative mx-auto max-w-5xl bg-white p-6 md:p-10 rounded-2xl shadow-lg border border-slate-200/80">
+        <header class="mb-12 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-indigo-600 leading-tight">Creador de Fichas de Personaje con IA</h1>
+            <p class="text-slate-500 mt-4 text-lg max-w-3xl mx-auto">Define, desarrolla y visualiza tus personajes con la magia de la inteligencia artificial.</p>
         </header>
 
-        <!-- Tabs Navigation -->
-        <div class="mb-6 border-b border-slate-300">
+        <div class="mb-8 border-b-2 border-slate-200">
             <nav class="flex flex-wrap -mb-px" aria-label="Tabs">
-                <button class="tab-button active text-lg py-3 px-4 md:px-6 border-b-2 font-medium" data-tab="basic">📄 Información Básica</button>
-                <button class="tab-button text-lg py-3 px-4 md:px-6 border-b-2 font-medium" data-tab="appearance">👁️ Apariencia</button>
-                <button class="tab-button text-lg py-3 px-4 md:px-6 border-b-2 font-medium" data-tab="personality">🧠 Personalidad</button>
+                <button class="tab-button active text-base md:text-lg" data-tab="basic">📄 Información Básica</button>
+                <button class="tab-button text-base md:text-lg" data-tab="appearance">👁️ Apariencia</button>
+                <button class="tab-button text-base md:text-lg" data-tab="personality">🧠 Personalidad</button>
             </nav>
         </div>
 
-        <!-- Tab Content -->
         <div id="tab-content">
-            <!-- Basic Information Tab -->
             <div id="basic-tab" class="tab-content active space-y-6">
-                <div>
+                 <div>
                     <label for="charName" class="block text-sm font-medium text-slate-700 mb-1">Nombre del Personaje:</label>
                     <input type="text" id="charName" class="form-input" placeholder="Ej: Arion Valerius">
                 </div>
@@ -225,21 +133,22 @@
                     <span class="loader hidden mr-2"></span>✨ Expandir Historia con IA
                 </button>
 
-                <div class="mt-8 pt-6 border-t border-slate-200 space-x-0 space-y-3 md:space-x-3 md:space-y-0 flex flex-wrap items-center justify-start">
-                    <button id="exportSheetBtn" class="btn btn-secondary w-full md:w-auto">📤 Exportar Ficha (JSON)</button>
-                    <button id="exportZipBtn" class="btn btn-primary w-full md:w-auto">📦 Exportar a ZIP</button> <!-- New button -->
-                    <button id="importSheetBtn" class="btn btn-secondary w-full md:w-auto">📥 Importar Ficha</button>
+                <div class="mt-8 pt-6 border-t border-slate-200 flex flex-col md:flex-row items-stretch md:items-center justify-start gap-3">
+                    <button id="exportSheetBtn" class="btn btn-secondary flex-grow">📤 Exportar Ficha (JSON)</button>
+                    <button id="exportZipBtn" class="btn btn-primary flex-grow"> 
+                        <span class="loader hidden"></span>📦 Exportar a ZIP
+                    </button>
+                    <button id="importSheetBtn" class="btn btn-secondary flex-grow">📥 Importar Ficha</button>
                 </div>
-                <div id="importSection" class="hidden mt-4 space-y-3">
+                <div id="importSection" class="hidden mt-4 space-y-3 p-4 bg-slate-50 rounded-lg border border-slate-200">
                     <label for="importJson" class="block text-sm font-medium text-slate-700">Pega el contenido JSON de la ficha aquí:</label>
-                    <textarea id="importJson" rows="5" class="form-textarea"></textarea>
-                    <button id="loadSheetBtn" class="btn btn-primary">Cargar Ficha</button>
+                    <textarea id="importJson" rows="7" class="form-textarea" placeholder="Aquí va el JSON de tu ficha..."></textarea>
+                    <button id="loadSheetBtn" class="btn btn-primary w-full">Cargar Ficha</button>
                 </div>
             </div>
 
-            <!-- Appearance Tab -->
             <div id="appearance-tab" class="tab-content space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label for="charHeight" class="block text-sm font-medium text-slate-700 mb-1">Altura:</label>
                         <input type="text" id="charHeight" class="form-input" placeholder="Ej: 1.80m">
@@ -250,22 +159,22 @@
                     </div>
                 </div>
                 <div>
-                    <label for="charFeatures" class="block text-sm font-medium text-slate-700 mb-1">Rasgos Distintivos:</label>
-                    <textarea id="charFeatures" rows="3" class="form-textarea" placeholder="Cicatrices, tatuajes, ojos de diferente color..."></textarea>
+                    <label for="charFeatures" class="block text-sm font-medium text-slate-700 mb-1">Rasgos Distintivos (MUY específico para consistencia. Ej: "Ojos: azul brillante, almendrados. Cicatrices: larga y fina sobre ceja izquierda. Pelo: negro azabache, corto y revuelto."):</label>
+                    <textarea id="charFeatures" rows="4" class="form-textarea" placeholder="Ej: Ojos: azules brillantes. Cicatrices: una profunda en la mejilla derecha. Tatuaje: un dragón en el antebrazo. Pelo: rojo fuego, largo y trenzado."></textarea>
+                    <p class="text-xs text-slate-500 mt-1">Proporciona detalles clave como color y forma de ojos, peinado y color, cicatrices (con ubicación), etc. ¡La especificidad es clave para la consistencia!</p>
                 </div>
                 <div>
-                    <label for="charClothing" class="block text-sm font-medium text-slate-700 mb-1">Vestimenta Típica:</label>
-                    <textarea id="charClothing" rows="3" class="form-textarea" placeholder="Armadura de cuero desgastada, túnica elegante..."></textarea>
+                    <label for="charClothing" class="block text-sm font-medium text-slate-700 mb-1">Vestimenta Típica (Primera línea es prioritaria para IA. Resto para detalle):</label>
+                    <textarea id="charClothing" rows="3" class="form-textarea" placeholder="Abrigo largo de lana oscura, desgastado por los viajes...\nTúnica elegante de seda azul...\nArmadura de placas completa con grabados..."></textarea>
                 </div>
                 <div>
-                    <label for="charEquipment" class="block text-sm font-medium text-slate-700 mb-1">Equipamiento/Accesorios:</label>
-                    <textarea id="charEquipment" rows="3" class="form-textarea" placeholder="Espada ancestral, kit de herramientas, amuleto misterioso..."></textarea>
+                    <label for="charEquipment" class="block text-sm font-medium text-slate-700 mb-1">Equipamiento/Accesorios (Primera línea es prioritaria para IA. Resto para detalle):</label>
+                    <textarea id="charEquipment" rows="3" class="form-textarea" placeholder="Espada ancestral con runas brillantes...\nKit de herramientas de ladrón...\nAmuleto de protección antiguo..."></textarea>
                 </div>
             </div>
 
-            <!-- Personality Tab -->
             <div id="personality-tab" class="tab-content space-y-6">
-                <div>
+                 <div>
                     <label for="charTraits" class="block text-sm font-medium text-slate-700 mb-1">Rasgos de Personalidad (separados por coma):</label>
                     <input type="text" id="charTraits" class="form-input" placeholder="Valiente, sarcástico, leal, curioso...">
                 </div>
@@ -279,475 +188,893 @@
                 </div>
                 <div>
                     <label for="charQuotes" class="block text-sm font-medium text-slate-700 mb-1">Citas Memorables (opcional):</label>
-                    <textarea id="charQuotes" rows="3" class="form-textarea" placeholder="&quot;El destino se escribe con acciones, no con palabras.&quot;"></textarea>
+                    <textarea id="charQuotes" rows="3" class="form-textarea" placeholder='"El destino se escribe con acciones, no con palabras."'></textarea>
                 </div>
             </div>
         </div>
 
-        <!-- AI Configuration and Artistic Style -->
-        <div class="mt-10 pt-6 border-t border-slate-300">
+        <div class="mt-10 pt-6 border-t-2 border-slate-200">
             <h2 class="section-title">🎨 Estilo Artístico y Configuración de IA</h2>
             <div class="space-y-6">
                 <div>
-                    <label for="apiKey" class="block text-sm font-medium text-slate-700 mb-1">Clave API de Google AI (Gemini) (Opcional):</label>
-                    <input type="password" id="apiKey" class="form-input" placeholder="Pega tu clave API aquí si la tienes" value="AIzaSyBqV7GAinY7BE1mxj16_f_mMIP1ADBri9o">
-                    <p class="text-xs text-slate-500 mt-1">Si no proporcionas una clave, las funciones de IA podrían tener limitaciones o no funcionar.</p>
+                    <label for="apiKey" class="block text-sm font-medium text-slate-700 mb-1">Clave API de Google AI (Gemini / Imagen):</label>
+                    <input type="password" id="apiKey" class="form-input" placeholder="Pega tu PROPIA clave API aquí" value="">
+                    <p class="text-xs text-slate-500 mt-1">Ingresa tu clave API personal de Google Cloud. Necesaria para generar imágenes y expandir texto. Asegúrate de que la API Vertex AI (o Generative Language API) esté habilitada y la facturación activa en tu proyecto.</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-2">Selecciona un Estilo Artístico para la Imagen:</label>
-                    <div id="artisticStyleSelector" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                        <div class="art-style-card selected border-2 border-blue-500 p-3 rounded-lg text-center bg-slate-50 hover:bg-slate-100" data-style="Concept Art">Concept Art</div>
-                        <div class="art-style-card border p-3 rounded-lg text-center bg-slate-50 hover:bg-slate-100" data-style="Pixar Animation">Animación Pixar</div>
-                        <div class="art-style-card border p-3 rounded-lg text-center bg-slate-50 hover:bg-slate-100" data-style="Anime Sketch">Boceto Anime</div>
-                        <div class="art-style-card border p-3 rounded-lg text-center bg-slate-50 hover:bg-slate-100" data-style="Photorealistic Portrait">Retrato Fotorrealista</div>
-                        <div class="art-style-card border p-3 rounded-lg text-center bg-slate-50 hover:bg-slate-100" data-style="Dark Fantasy Art">Arte Fantasía Oscura</div>
-                        <div class="art-style-card border p-3 rounded-lg text-center bg-slate-50 hover:bg-slate-100" data-style="Cyberpunk">Cyberpunk</div>
-                        <div class="art-style-card border p-3 rounded-lg text-center bg-slate-50 hover:bg-slate-100" data-style="Watercolor Painting">Pintura Acuarela</div>
-                        <div class="art-style-card border p-3 rounded-lg text-center bg-slate-50 hover:bg-slate-100" data-style="Pixel Art">Pixel Art</div>
+                    <div id="artisticStyleSelector" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-5">
+                        <div class="art-style-card selected" data-style="Concept Art">Concept Art</div>
+                        <div class="art-style-card" data-style="Pixar Animation">Animación Pixar</div>
+                        <div class="art-style-card" data-style="Anime Sketch">Boceto Anime</div>
+                        <div class="art-style-card" data-style="Photorealistic Portrait">Retrato Fotorrealista</div>
+                        <div class="art-style-card" data-style="Dark Fantasy Art">Arte Fantasía Oscura</div>
+                        <div class="art-style-card" data-style="Cyberpunk">Cyberpunk</div>
+                        <div class="art-style-card" data-style="Watercolor Painting">Pintura Acuarela</div>
+                        <div class="art-style-card" data-style="Pixel Art">Pixel Art</div>
+                        
+                        <div class="art-style-card" data-style="American Comic">Cómic Americano</div>
+                        <div class="art-style-card" data-style="Steampunk">Steampunk</div>
+                        <div class="art-style-card" data-style="Low Poly Art">Arte Low Poly</div>
+                        <div class="art-style-card" data-style="Classic Manga">Manga Clásico</div>
+                        <div class="art-style-card" data-style="Gothic Art">Arte Gótico</div>
+                        <div class="art-style-card" data-style="Western Cartoon">Cartoon Occidental</div>
+                        <div class="art-style-card" data-style="Tribal Art">Arte Tribal o Étnico</div>
+                        <div class="art-style-card" data-style="Abstract Art">Arte Abstracto</div>
+                        <div class="art-style-card" data-style="Pop Art">Pop Art</div>
+                        <div class="art-style-card" data-style="Renaissance Art">Arte Renacentista</div>
+                        <div class="art-style-card" data-style="Chibi Art">Arte Chibi</div>
+                        <div class="art-style-card" data-style="Noir / Black and White">Noir / Blanco y Negro</div>
+                        <div class="art-style-card" data-style="Vaporwave Art">Arte Vaporwave</div>
+                        <div class="art-style-card" data-style="Ink Art">Arte de Tinta</div>
+                        <div class="art-style-card" data-style="Vector Art">Arte Vectorial</div>
                     </div>
                     <input type="hidden" id="selectedArtStyle" value="Concept Art">
                 </div>
                 <div>
                     <label for="negativePrompts" class="block text-sm font-medium text-slate-700 mb-1">Prompts Negativos (opcional, separados por coma):</label>
-                    <input type="text" id="negativePrompts" class="form-input" placeholder="Ej: borroso, deformado, mala anatomía">
-                    <p class="text-xs text-slate-500 mt-1">Elementos que NO quieres que aparezcan en la imagen.</p>
+                    <input type="text" id="negativePrompts" class="form-input" placeholder="Ej: borroso, mal dibujado, deformado">
+                    <p class="text-xs text-slate-500 mt-1">Elementos NO deseados. Por defecto se añaden prompts para evitar texto e inconsistencias. Añade más si es necesario (ej: "sombrero, gafas" si tu personaje no los lleva).</p>
                 </div>
             </div>
         </div>
 
-        <!-- AI Prompt Preview -->
-        <div class="mt-10 pt-6 border-t border-slate-300">
-            <h2 class="section-title">📝 Vista Previa del Prompt de IA (Base para Imagen)</h2>
-            <div id="promptPreview" class="p-4 bg-slate-50 rounded-md border border-slate-200 text-sm text-slate-700 min-h-[100px] whitespace-pre-wrap">
+        <div class="mt-10 pt-6 border-t-2 border-slate-200">
+            <h2 class="section-title">📝 Vista Previa del Prompt (Base para IA)</h2>
+            <div id="promptPreview" class="p-4 bg-slate-800 text-slate-200 rounded-lg border border-slate-700 text-sm min-h-[120px] whitespace-pre-wrap font-mono overflow-auto selection:bg-indigo-500 selection:text-white">
                 Actualiza los campos para ver la vista previa del prompt...
             </div>
+            <p class="text-xs text-slate-500 mt-1">Nota: El prompt final enviado a la IA será más elaborado, enfocándose en la consistencia y los detalles clave.</p>
         </div>
 
-        <!-- Generate Button -->
-        <div class="mt-10 pt-6 border-t border-slate-300 text-center">
-            <button id="generateSheetBtn" class="btn btn-primary text-lg px-8 py-3">
-                <span class="loader hidden mr-2"></span>🔮 Generar Ficha de Personaje (e Imágenes)
+        <div class="mt-12 pt-8 border-t border-slate-200/80 text-center space-y-4 md:space-y-0 md:flex md:justify-center md:gap-4">
+            <button id="generateSheetBtn" class="btn btn-primary text-base px-8 py-3 w-full md:w-auto">
+                <span class="loader hidden mr-2"></span>🔮 Generar Imagen Única
+            </button>
+            <button id="generateModelSheetBtn" class="btn btn-primary text-base px-8 py-3 bg-teal-500 hover:bg-teal-600 w-full md:w-auto">
+                <span class="loader hidden mr-2"></span>🎨 Generar Hoja de Modelo
             </button>
         </div>
 
-        <!-- Generated Images -->
-        <div id="generatedImagesSection" class="mt-10 pt-6 border-t border-slate-300 hidden">
-            <h2 class="section-title">🖼️ Imágenes Generadas</h2>
-            <div id="imageThumbnails" class="thumbnail-container flex flex-wrap justify-center gap-4">
-                <!-- Thumbnails will be appended here -->
-            </div>
+        <div id="generatedImagesSection" class="mt-10 pt-6 border-t-2 border-slate-200 hidden">
+            <h2 class="section-title">🖼️ Imagen Única Generada</h2>
+            <div id="imageThumbnails" class="thumbnail-container flex flex-wrap justify-center gap-4 py-4"></div>
             <p id="noImagesMessage" class="text-center text-slate-500 hidden">No se han generado imágenes aún o la generación falló.</p>
         </div>
+
+        <div id="modelSheetImagesSection" class="mt-10 pt-6 border-t-2 border-slate-200 hidden">
+            <h2 class="section-title">🎨 Hoja de Modelo Detallada Generada</h2>
+            <p class="text-sm text-slate-600 mb-4 text-center">
+                Se generarán múltiples vistas y detalles para una hoja de modelo completa. Se intenta maximizar la consistencia.
+                <br><strong>Este proceso generará varias imágenes y puede tardar unos minutos.</strong>
+                Descarga las imágenes individualmente.
+            </p>
+            <div id="modelSheetThumbnails" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 py-4">
+                </div>
+            <p id="noModelSheetMessage" class="text-center text-slate-500 hidden mt-4">No se han generado vistas para la hoja de modelo o la generación falló.</p>
+        </div>
+
+        <div id="dragDropOverlay" class="hidden absolute inset-0 bg-slate-900/70 z-50 flex flex-col items-center justify-center rounded-2xl">
+            <div class="pointer-events-none text-center p-4">
+                <svg class="mx-auto h-16 w-16 text-slate-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9A2.25 2.25 0 0 0 18.75 19.5v-9a2.25 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0 0-3 3m3-3v11.25" />
+                </svg>
+                <p class="mt-4 text-2xl font-bold text-white">Suelta tu archivo JSON para importar</p>
+                <p class="text-slate-300 mt-1">El archivo se procesará localmente en tu navegador.</p>
+            </div>
+        </div>
+
     </div>
 
-    <!-- Message Modal -->
     <div id="messageModal" class="modal">
         <div class="modal-content">
-            <span class="modal-close" onclick="closeModal('messageModal')">&times;</span>
-            <h3 id="messageModalTitle" class="text-xl font-semibold mb-3">Mensaje</h3>
-            <p id="messageModalText"></p>
-            <div class="mt-4 text-right">
+            <span class="modal-close" onclick="closeModal('messageModal')">×</span>
+            <h3 id="messageModalTitle" class="text-xl font-semibold mb-3 text-slate-800">Mensaje</h3>
+            <p id="messageModalText" class="text-sm text-slate-700"></p>
+            <div class="mt-6 text-right">
                 <button class="btn btn-primary" onclick="closeModal('messageModal')">Entendido</button>
             </div>
         </div>
     </div>
 
-    <!-- Image Preview Modal -->
     <div id="imagePreviewModal" class="modal" onclick="closeModal('imagePreviewModal')">
-        <div class="modal-content p-2 bg-transparent shadow-none max-w-max max-h-max" onclick="event.stopPropagation();">
-               <span class="modal-close text-white bg-black bg-opacity-50 rounded-full p-1 leading-none text-2xl -mr-3 -mt-3" onclick="closeModal('imagePreviewModal')">&times;</span>
+        <div class="modal-content" onclick="event.stopPropagation();">
+            <span class="modal-close" onclick="closeModal('imagePreviewModal')">×</span>
             <img id="fullPreviewImage" src="https://placehold.co/600x400/E2E8F0/4A5568?text=Preview" alt="Image Preview" class="rounded-lg">
         </div>
     </div>
 
     <script>
-        // Global variable to store generated image base64 data
-        let currentGeneratedImages = [];
+        // Global variables to store generated image data
+        let currentGeneratedImages = []; // Stores Base64 for single images
+        let currentModelSheetImages = {}; // Stores Base64 for model sheet images, by name
 
-        // DOM Elements
-        const tabButtons = document.querySelectorAll('.tab-button');
-        const tabContents = document.querySelectorAll('.tab-content');
-        const apiKeyInput = document.getElementById('apiKey');
-        const expandStoryBtn = document.getElementById('expandStoryBtn');
-        const generateSheetBtn = document.getElementById('generateSheetBtn');
-        const promptPreview = document.getElementById('promptPreview');
-        const artisticStyleSelector = document.getElementById('artisticStyleSelector');
-        const selectedArtStyleInput = document.getElementById('selectedArtStyle');
-        const negativePromptsInput = document.getElementById('negativePrompts');
-        const imageThumbnailsContainer = document.getElementById('imageThumbnails');
-        const generatedImagesSection = document.getElementById('generatedImagesSection');
-        const noImagesMessage = document.getElementById('noImagesMessage');
-        
-        const exportSheetBtn = document.getElementById('exportSheetBtn');
-        const exportZipBtn = document.getElementById('exportZipBtn'); // New button element
-        const importSheetBtn = document.getElementById('importSheetBtn');
-        const importSection = document.getElementById('importSection');
-        const importJsonTextarea = document.getElementById('importJson');
-        const loadSheetBtn = document.getElementById('loadSheetBtn');
-
-        // Character data fields
+        // Object to hold references to commonly used UI elements for easier access
+        const UIElements = {};
+        // Array of character data field IDs
         const charFields = [
             'charName', 'charTitle', 'charRace', 'charClass', 'charBackground',
             'charHeight', 'charWeight', 'charFeatures', 'charClothing', 'charEquipment',
             'charTraits', 'charIdeals', 'charFlaws', 'charQuotes'
         ];
-        const charInputElements = {};
-        charFields.forEach(id => {
-            charInputElements[id] = document.getElementById(id);
-            if (charInputElements[id]) {
-                charInputElements[id].addEventListener('input', updatePromptPreview);
-            }
-        });
+        // Object to store references to character input elements
+        const charInputElements = {}; 
 
-        // Initial Setup
+        // DOMContentLoaded event listener ensures script runs after the entire HTML document is loaded
         document.addEventListener('DOMContentLoaded', () => {
-            // Tab functionality
-            tabButtons.forEach(button => {
+            // Populate UIElements and charInputElements objects with references to DOM elements
+            UIElements.apiKeyInput = document.getElementById('apiKey');
+            UIElements.expandStoryBtn = document.getElementById('expandStoryBtn');
+            UIElements.generateSheetBtn = document.getElementById('generateSheetBtn');
+            UIElements.promptPreview = document.getElementById('promptPreview');
+            UIElements.artisticStyleSelector = document.getElementById('artisticStyleSelector');
+            UIElements.selectedArtStyleInput = document.getElementById('selectedArtStyle');
+            UIElements.negativePromptsInput = document.getElementById('negativePrompts');
+            UIElements.generatedImagesSection = document.getElementById('generatedImagesSection');
+            UIElements.imageThumbnailsContainer = document.getElementById('imageThumbnails');
+            UIElements.noImagesMessage = document.getElementById('noImagesMessage');
+            UIElements.exportSheetBtn = document.getElementById('exportSheetBtn');
+            UIElements.exportZipBtn = document.getElementById('exportZipBtn');
+            UIElements.importSheetBtn = document.getElementById('importSheetBtn');
+            UIElements.importSection = document.getElementById('importSection');
+            UIElements.importJsonTextarea = document.getElementById('importJson');
+            UIElements.loadSheetBtn = document.getElementById('loadSheetBtn');
+            UIElements.generateModelSheetBtn = document.getElementById('generateModelSheetBtn');
+            UIElements.modelSheetImagesSection = document.getElementById('modelSheetImagesSection');
+            UIElements.modelSheetThumbnailsContainer = document.getElementById('modelSheetThumbnails');
+            UIElements.noModelSheetMessage = document.getElementById('noModelSheetMessage');
+            UIElements.tabButtons = document.querySelectorAll('.tab-button');
+            UIElements.tabContents = document.querySelectorAll('.tab-content');
+            UIElements.dragDropOverlay = document.getElementById('dragDropOverlay');
+            const dropTarget = document.querySelector('.container');
+
+            // Add event listeners to character input fields to update the prompt preview dynamically
+            charFields.forEach(id => {
+                charInputElements[id] = document.getElementById(id);
+                if (charInputElements[id]) {
+                    charInputElements[id].addEventListener('input', updatePromptPreview);
+                }
+            });
+
+            // Add click listeners to tab buttons for navigation
+            UIElements.tabButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     const targetTab = button.dataset.tab;
-                    tabButtons.forEach(btn => {
-                        btn.classList.remove('active', 'border-blue-500', 'text-blue-500', 'bg-blue-50');
-                        btn.classList.add('border-transparent', 'hover:text-slate-700', 'hover:border-slate-300');
+                    // Deactivate all tab buttons and content
+                    UIElements.tabButtons.forEach(btn => {
+                        btn.classList.remove('active');
                     });
-                    button.classList.add('active', 'border-blue-500', 'text-blue-500', 'bg-blue-50');
-                    button.classList.remove('border-transparent', 'hover:text-slate-700', 'hover:border-slate-300');
-                    
-                    tabContents.forEach(content => {
+                    UIElements.tabContents.forEach(content => {
                         content.classList.remove('active');
-                        if (content.id === `${targetTab}-tab`) {
-                            content.classList.add('active');
-                        }
                     });
+                    // Activate the clicked tab button and its corresponding content
+                    button.classList.add('active');
+                    document.getElementById(`${targetTab}-tab`).classList.add('active');
                 });
             });
 
-            // Artistic Style Selector
-            artisticStyleSelector.addEventListener('click', (e) => {
-                if (e.target.classList.contains('art-style-card')) {
-                    artisticStyleSelector.querySelectorAll('.art-style-card').forEach(card => {
-                        card.classList.remove('selected', 'border-blue-500', 'shadow-md');
-                        card.classList.add('border-slate-300');
-                    });
-                    e.target.classList.add('selected', 'border-blue-500', 'shadow-md');
-                    e.target.classList.remove('border-slate-300');
-                    selectedArtStyleInput.value = e.target.dataset.style;
-                    updatePromptPreview();
-                }
-            });
-            
-            // Update prompt preview on negative prompt change
-            if (negativePromptsInput) {
-                negativePromptsInput.addEventListener('input', updatePromptPreview);
-            }
-
-            // Button event listeners
-            expandStoryBtn.addEventListener('click', handleExpandStory);
-            generateSheetBtn.addEventListener('click', handleGenerateSheet);
-            exportSheetBtn.addEventListener('click', handleExportSheet);
-            exportZipBtn.addEventListener('click', handleExportZip); // Event listener for new button
-            importSheetBtn.addEventListener('click', () => {
-                importSection.classList.toggle('hidden');
-            });
-            loadSheetBtn.addEventListener('click', handleImportSheet);
-
-            updatePromptPreview(); // Initial prompt preview
-        });
-
-        // --- Helper Functions ---
-        function showModal(modalId, title, message) {
-            document.getElementById(modalId + 'Title').textContent = title;
-            document.getElementById(modalId + 'Text').textContent = message;
-            document.getElementById(modalId).style.display = 'flex';
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        function showImagePreviewModal(imageUrl) {
-            document.getElementById('fullPreviewImage').src = imageUrl;
-            document.getElementById('imagePreviewModal').style.display = 'flex';
-        }
-        
-        function toggleButtonLoader(buttonElement, show) {
-            const loader = buttonElement.querySelector('.loader');
-            if (loader) {
-                loader.classList.toggle('hidden', !show);
-            }
-            buttonElement.disabled = show;
-        }
-
-        // --- Character Data Handling ---
-        function getCharacterData() {
-            const data = {};
-            charFields.forEach(id => {
-                if (charInputElements[id]) {
-                    data[id] = charInputElements[id].value;
-                }
-            });
-            data.selectedArtStyle = selectedArtStyleInput.value;
-            data.negativePrompts = negativePromptsInput.value;
-            return data;
-        }
-
-        function setCharacterData(data) {
-            charFields.forEach(id => {
-                if (charInputElements[id] && data[id] !== undefined) {
-                    charInputElements[id].value = data[id];
-                }
-            });
-            if (data.selectedArtStyle) {
-                selectedArtStyleInput.value = data.selectedArtStyle;
-                artisticStyleSelector.querySelectorAll('.art-style-card').forEach(card => {
-                    card.classList.remove('selected', 'border-blue-500', 'shadow-md');
-                    card.classList.add('border-slate-300');
-                    if (card.dataset.style === data.selectedArtStyle) {
-                        card.classList.add('selected', 'border-blue-500', 'shadow-md');
-                        card.classList.remove('border-slate-300');
+            // Add click listener to artistic style cards
+            if (UIElements.artisticStyleSelector) {
+                UIElements.artisticStyleSelector.addEventListener('click', (e) => {
+                    // Make sure the click is on a card and not on the container itself
+                    const card = e.target.closest('.art-style-card');
+                    if (card) {
+                        // Remove 'selected' class from all cards
+                        UIElements.artisticStyleSelector.querySelectorAll('.art-style-card').forEach(c => {
+                            c.classList.remove('selected');
+                        });
+                        // Add 'selected' class to the clicked card
+                        card.classList.add('selected');
+                        // Update the hidden input with the selected style
+                        UIElements.selectedArtStyleInput.value = card.dataset.style;
+                        updatePromptPreview(); // Update prompt preview based on new style
                     }
                 });
             }
-            if (data.negativePrompts) {
-                negativePromptsInput.value = data.negativePrompts;
-            }
-            updatePromptPreview();
-            showModal('messageModal', 'Éxito', 'Ficha de personaje cargada correctamente.');
-        }
-
-        // --- Prompt Preview ---
-        function updatePromptPreview() {
-            const data = getCharacterData();
-            let previewText = `Personaje: ${data.charName || '[Nombre]'}\n`;
-            previewText += `Título/Apodo: ${data.charTitle || '[Título]'}\n`;
-            previewText += `Raza/Especie: ${data.charRace || '[Raza]'}\n`;
-            previewText += `Ocupación/Clase: ${data.charClass || '[Clase]'}\n\n`;
-            previewText += `Apariencia:\n`;
-            previewText += `  Altura: ${data.charHeight || '[Altura]'}\n`;
-            previewText += `  Peso/Complexión: ${data.charWeight || '[Peso/Complexión]'}\n`;
-            previewText += `  Rasgos Distintivos: ${data.charFeatures || '[Ninguno]'}\n`;
-            previewText += `  Vestimenta: ${data.charClothing || '[Ropa Típica]'}\n`;
-            previewText += `  Equipamiento: ${data.charEquipment || '[Ninguno]'}\n\n`;
-            previewText += `Personalidad:\n`;
-            previewText += `  Rasgos: ${data.charTraits || '[Rasgos]'}\n`;
-            previewText += `  Ideales: ${data.charIdeals || '[Ideales]'}\n`;
-            previewText += `  Defectos: ${data.charFlaws || '[Defectos]'}\n\n`;
-            previewText += `Estilo Artístico: ${selectedArtStyleInput.value}\n`;
-            if (data.negativePrompts) {
-                previewText += `Prompts Negativos: ${data.negativePrompts}\n`;
-            }
-            promptPreview.textContent = previewText;
-        }
-
-        // --- AI API Calls ---
-        async function callGeminiTextAPI(promptContent) {
-            const userApiKey = apiKeyInput.value.trim();
-            const apiKey = userApiKey || "AIzaSyBqV7GAinY7BE1mxj16_f_mMIP1ADBri9o";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
             
-            const payload = {
-                contents: [{ role: "user", parts: [{ text: promptContent }] }]
+            // Add event listeners for other interactive elements
+            if (UIElements.negativePromptsInput) UIElements.negativePromptsInput.addEventListener('input', updatePromptPreview);
+            if (UIElements.expandStoryBtn) UIElements.expandStoryBtn.addEventListener('click', handleExpandStory);
+            if (UIElements.generateSheetBtn) UIElements.generateSheetBtn.addEventListener('click', handleGenerateSheet);
+            
+            if (UIElements.exportSheetBtn) UIElements.exportSheetBtn.addEventListener('click', handleExportSheet);
+            if (UIElements.exportZipBtn) UIElements.exportZipBtn.addEventListener('click', handleExportZip);
+            
+            // Toggle visibility of import section when 'Import Sheet' button is clicked
+            if (UIElements.importSheetBtn && UIElements.importSection && UIElements.importJsonTextarea) {
+                UIElements.importSheetBtn.addEventListener('click', () => {
+                    UIElements.importSection.classList.toggle('hidden');
+                    if (!UIElements.importSection.classList.contains('hidden')) {
+                        UIElements.importJsonTextarea.focus(); // Focus on textarea when visible
+                    }
+                });
+            }
+            if (UIElements.loadSheetBtn) UIElements.loadSheetBtn.addEventListener('click', handleImportSheet);
+            if (UIElements.generateModelSheetBtn) UIElements.generateModelSheetBtn.addEventListener('click', handleGenerateModelSheet);
+
+            updatePromptPreview(); // Initial update of the prompt preview on page load
+
+            // --- Drag and Drop Logic ---
+            const handleDragEnter = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                UIElements.dragDropOverlay.classList.remove('hidden');
+                UIElements.dragDropOverlay.classList.remove('drag-over'); // Reset visual state
             };
 
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+            const handleDragOver = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                UIElements.dragDropOverlay.classList.add('drag-over'); // Add visual feedback
+            };
+
+            const handleDragLeave = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // This condition prevents the overlay from flickering when dragging over child elements.
+                // It only hides the overlay if the mouse leaves the overlay itself.
+                if (e.target === UIElements.dragDropOverlay) {
+                    UIElements.dragDropOverlay.classList.add('hidden');
+                    UIElements.dragDropOverlay.classList.remove('drag-over');
+                }
+            };
+
+            const handleDrop = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                UIElements.dragDropOverlay.classList.add('hidden');
+                UIElements.dragDropOverlay.classList.remove('drag-over');
+
+                const files = e.dataTransfer.files;
+                if (files.length !== 1) {
+                    showModal('messageModal', 'Error de Importación', 'Por favor, suelta un único archivo.');
+                    return;
+                }
+
+                const file = files[0];
+                if (file.type !== 'application/json') {
+                    showModal('messageModal', 'Error de Tipo de Archivo', `El archivo debe ser de tipo JSON (.json). El tipo detectado fue: ${file.type}`);
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const jsonString = event.target.result;
+                    try {
+                        const importedData = JSON.parse(jsonString);
+                        if (typeof importedData !== 'object' || importedData === null) {
+                             throw new Error("El JSON no es un objeto válido.");
+                        }
+                        setCharacterData(importedData);
+                        showModal('messageModal', 'Éxito', 'Ficha de personaje importada correctamente desde el archivo.');
+                    } catch (error) {
+                        showModal('messageModal', 'Error de Importación', `Error al procesar el archivo JSON: ${error.message}.`);
+                    }
+                };
+                reader.onerror = () => {
+                    showModal('messageModal', 'Error de Lectura', 'No se pudo leer el archivo.');
+                };
+                reader.readAsText(file);
+            };
+
+            // Assign listeners. 'dragenter' is on the main container to trigger the overlay.
+            // The rest are on the overlay itself to provide a stable drop target.
+            if (dropTarget && UIElements.dragDropOverlay) {
+                dropTarget.addEventListener('dragenter', handleDragEnter, false);
+                
+                UIElements.dragDropOverlay.addEventListener('dragover', handleDragOver, false);
+                UIElements.dragDropOverlay.addEventListener('dragleave', handleDragLeave, false);
+                UIElements.dragDropOverlay.addEventListener('drop', handleDrop, false);
+            }
+        });
+
+        /**
+         * Displays a modal with a given title and message.
+         * @param {string} modalId - The ID of the modal element.
+         * @param {string} title - The title to display in the modal header.
+         * @param {string} message - The message content for the modal body (can contain HTML).
+         */
+        function showModal(modalId, title, message) {
+            const modal = document.getElementById(modalId);
+            const modalTitleEl = document.getElementById(modalId + 'Title');
+            const modalTextEl = document.getElementById(modalId + 'Text');
+            if (modalTitleEl) modalTitleEl.textContent = title;
+            if (modalTextEl) modalTextEl.innerHTML = message; 
+            if (modal) modal.style.display = 'flex'; // Use flex to center the modal
+        }
+
+        /**
+         * Closes a modal.
+         * @param {string} modalId - The ID of the modal element to close.
+         */
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) modal.style.display = 'none';
+        }
+
+        /**
+         * Displays the image preview modal with a specific image.
+         * @param {string} imageUrl - The URL (or data URL) of the image to display.
+         */
+        function showImagePreviewModal(imageUrl) {
+            const fullPreviewImage = document.getElementById('fullPreviewImage');
+            const imagePreviewModal = document.getElementById('imagePreviewModal');
+            if (fullPreviewImage) fullPreviewImage.src = imageUrl;
+            if (imagePreviewModal) imagePreviewModal.style.display = 'flex';
+        }
+        
+        /**
+         * Toggles the visibility of a loader spinner within a button and disables/enables the button.
+         * @param {HTMLElement} buttonElement - The button element containing the loader.
+         * @param {boolean} show - True to show the loader and disable the button, false otherwise.
+         */
+        function toggleButtonLoader(buttonElement, show) {
+            if (!buttonElement) return;
+            const loader = buttonElement.querySelector('.loader');
+            if (loader) loader.classList.toggle('hidden', !show);
+            buttonElement.disabled = show; // Disable button when loader is shown
+        }
+
+        /**
+         * Gathers all character data from input fields and returns it as an object.
+         * @returns {object} An object containing all character data.
+         */
+        function getCharacterData() {
+            const data = {};
+            charFields.forEach(id => data[id] = charInputElements[id] ? charInputElements[id].value.trim() : '');
+            if (UIElements.selectedArtStyleInput) data.selectedArtStyle = UIElements.selectedArtStyleInput.value;
+            if (UIElements.negativePromptsInput) data.negativePrompts = UIElements.negativePromptsInput.value.trim();
+            return data;
+        }
+
+        /**
+         * Sets character data into the input fields, useful for importing.
+         * @param {object} data - An object containing character data to populate the form.
+         */
+        function setCharacterData(data) {
+            charFields.forEach(id => {
+                if (charInputElements[id] && data[id] !== undefined) charInputElements[id].value = data[id];
+            });
+            // Update selected artistic style card
+            if (data.selectedArtStyle && UIElements.selectedArtStyleInput && UIElements.artisticStyleSelector) {
+                UIElements.selectedArtStyleInput.value = data.selectedArtStyle;
+                UIElements.artisticStyleSelector.querySelectorAll('.art-style-card').forEach(card => {
+                    const isSelected = card.dataset.style === data.selectedArtStyle;
+                    card.classList.toggle('selected', isSelected);
                 });
+            }
+            // Update negative prompts
+            if (data.negativePrompts !== undefined && UIElements.negativePromptsInput) {
+                UIElements.negativePromptsInput.value = data.negativePrompts;
+            }
+            updatePromptPreview(); // Update prompt preview after setting data
+        }
+
+        /**
+         * Updates the prompt preview textarea based on current character data.
+         * This shows the user what information will be primarily used for AI generation.
+         */
+        function updatePromptPreview() { 
+            const data = getCharacterData();
+            let coreFeaturesText = getCoreCharacterFeatures(data);
+
+            let previewText = `Nombre: ${data.charName || '[N/A]'}\n`;
+            previewText += `Raza/Clase: ${data.charRace || '[N/A]'} / ${data.charClass || '[N/A]'}\n`;
+            previewText += `Descripción Base para IA (Rasgos Clave):\n  "${coreFeaturesText}"\n\n`;
+            previewText += `Vestimenta Principal: ${getCondensedText(data.charClothing, 70, 1) || '[N/A]'}\n`;
+            previewText += `Equipo Principal: ${getCondensedText(data.charEquipment, 70, 1) || '[N/A]'}\n\n`;
+            previewText += `Estilo Artístico: ${UIElements.selectedArtStyleInput.value}\n`;
+            if (data.negativePrompts) previewText += `Prompts Negativos (Usuario): ${data.negativePrompts}\n`;
+            
+            if(UIElements.promptPreview) UIElements.promptPreview.textContent = previewText;
+        }
+        
+        /**
+         * Condenses a given text to a maximum length and/or number of items.
+         * Useful for creating brief descriptions from longer texts.
+         * @param {string} text - The input text.
+         * @param {number} maxLength - The maximum desired length of the condensed text.
+         * @param {number} maxItems - The maximum number of items (lines separated by itemSeparator) to include.
+         * @param {string} itemSeparator - The string used to separate items (e.g., '\n' for lines).
+         * @returns {string} The condensed text.
+         */
+        function getCondensedText(text, maxLength = 100, maxItems = 1, itemSeparator = '\n') {
+            if (!text || !text.trim()) return "";
+            text = text.trim();
+            if (text.includes(itemSeparator) && itemSeparator !== '') { 
+                const items = text.split(itemSeparator).map(item => item.trim()).filter(item => item);
+                let condensed = items.slice(0, maxItems).join(', ');
+                if (items.length > maxItems) condensed += "...";
+                if (condensed.length > maxLength) condensed = condensed.substring(0, maxLength - 3) + "...";
+                return condensed;
+            } else { 
+                if (text.length <= maxLength) return text;
+                return text.substring(0, maxLength - 3) + "...";
+            }
+        }
+        
+        /**
+         * Extracts core character features from the data for consistent AI prompting.
+         * This function attempts to parse structured features like eyes, scars, hair from a free-text field.
+         * @param {object} data - The character data object.
+         * @returns {string} A condensed string of core character features.
+         */
+        function getCoreCharacterFeatures(data) {
+            let features = [];
+            if (data.charRace) features.push(data.charRace.toLowerCase());
+            if (data.charClass) features.push(data.charClass.toLowerCase());
+            
+            // Attempt to parse specific features from the 'charFeatures' field
+            if (data.charFeatures) {
+                const cf = data.charFeatures.toLowerCase();
+                const eyeMatch = cf.match(/ojos:\s*([^.]+)/);
+                if (eyeMatch && eyeMatch[1]) features.push(`${eyeMatch[1].trim().replace(/,/g, '')} eyes`);
+
+                const scarMatch = cf.match(/cicatrices:\s*([^.]+)/);
+                if (scarMatch && scarMatch[1]) features.push(`with ${scarMatch[1].trim().replace(/,/g, '')}`);
+                
+                const hairMatch = cf.match(/pelo:|cabello:\s*([^.]+)/);
+                 if (hairMatch && hairMatch[1]) features.push(`${hairMatch[1].trim().replace(/,/g, '')} hair`);
+            }
+            if (data.charHeight) features.push(`${data.charHeight.toLowerCase()} tall`);
+            if (data.charWeight) features.push(data.charWeight.toLowerCase());
+
+            let coreString = features.filter(f => f.trim() !== "").join(', ');
+            
+            if (data.charName) {
+                coreString = `${data.charName}, ${coreString}`;
+            } else if (coreString) {
+                coreString = `A character who is ${coreString}`;
+            } else {
+                coreString = "The described character";
+            }
+            // Clean up any double commas or trailing commas
+            return coreString.replace(/,\s*,/g, ',').replace(/,$/, '').trim();
+        }
+
+        /**
+         * Constructs the detailed prompt for image generation based on character data and desired view details.
+         * @param {object} data - The character data.
+         * @param {string|null} view_details - Specific details about the view (e.g., "headshot", "full body standing").
+         * @param {string|null} coreFeaturesOverride - Optional override for core character features string to ensure consistency.
+         * @returns {string} The complete prompt for the image generation AI.
+         */
+        function constructImageGenerationPrompt(data, view_details = null, coreFeaturesOverride = null) {
+            let promptSegments = [];
+            const artStyle = data.selectedArtStyle || 'Detailed character concept art'; // Default art style
+            // Use override or generate core features for consistency
+            const consistentCoreFeatures = coreFeaturesOverride || getCoreCharacterFeatures(data);
+
+            // Base prompt for consistency, emphasizing character sheet context and consistency
+            promptSegments.push(`EXTREMELY CONSISTENT CHARACTER SHEET IMAGE of ${consistentCoreFeatures}. ${view_details ? view_details : ''} Crucial: Maintain IDENTICAL core facial features, hairstyle, body type, and any specified unique marks (like scars) as per '${consistentCoreFeatures}' across ALL images. This is for a character model sheet. NO text, letters, or symbols. Single character only. Clean background unless specified.`);
+            promptSegments.push(`${artStyle}.`); // Add the selected artistic style
+            
+            // Add specific attire/equipment details based on view
+            if (view_details && view_details.toLowerCase().includes("close-up of clothing")) {
+                 promptSegments.push(`Detailed close-up on clothing: ${data.charClothing || 'described clothing'}. Focus on texture, material, design.`);
+            } else if (view_details && view_details.toLowerCase().includes("close-up of equipment")) {
+                 promptSegments.push(`Detailed close-up on equipment: ${data.charEquipment || 'described equipment'}. Focus on form, material, unique details.`);
+            } else if (!view_details || (!view_details.toLowerCase().includes("headshot"))) {
+                let attireDetails = [];
+                if (data.charClothing && data.charClothing.trim()) {
+                    attireDetails.push(`wearing ${getCondensedText(data.charClothing, 70, 1, '\n')}`);
+                }
+                if (data.charEquipment && data.charEquipment.trim()) {
+                    attireDetails.push(`${attireDetails.length > 0 ? 'and' : ''} equipped with ${getCondensedText(data.charEquipment, 70, 1, '\n')}`);
+                }
+                if (attireDetails.length > 0) promptSegments.push(`Attire: ${attireDetails.join(' ')}.`);
+            }
+            
+            // Combine all segments and add negative prompts
+            let finalPrompt = promptSegments.filter(segment => segment && segment.trim().length > 0).join(' ');
+            // Default negative prompts to avoid common AI generation issues
+            let negativeBase = "text, letters, words, numbers, symbols, signature, watermark, multiple characters, different character, inconsistent face, changing facial features, different hairstyle, varying body type, morphed features, distorted, malformed, blurry, low quality, ugly";
+            if (data.negativePrompts) {
+                finalPrompt += ` --no ${data.negativePrompts}, ${negativeBase}`;
+            } else {
+                finalPrompt += ` --no ${negativeBase}`;
+            }
+            
+            // Clean up extra spaces or punctuation issues
+            return finalPrompt.replace(/\s\s+/g, ' ').replace(/\.\.+/g, '.').replace(/,\./g, '.').trim();
+        }
+
+        /**
+         * Calls the Gemini Text API to generate text.
+         * @param {string} promptContent - The text prompt for the API.
+         * @returns {Promise<string|null>} A promise that resolves to the generated text or null if an error occurs.
+         */
+        async function callGeminiTextAPI(promptContent) {
+            const currentApiKey = UIElements.apiKeyInput ? UIElements.apiKeyInput.value.trim() : '';
+            // Allow the example key to work for Gemini Text if no other is provided, as it's often more permissive
+            const apiKeyToUse = currentApiKey || ""; 
+            if (!apiKeyToUse) {
+                 showModal('messageModal', 'Error de Configuración', 'Se requiere una clave API para la expansión de texto.');
+                return null;
+            }
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKeyToUse}`;
+            const payload = { contents: [{ role: "user", parts: [{ text: promptContent }] }] };
+            try {
+                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 if (!response.ok) {
                     const errorData = await response.json();
-                    console.error('Error en API Gemini Text:', errorData);
-                    throw new Error(`Error de API: ${response.status} ${response.statusText}. ${errorData.error?.message || ''}`);
+                    throw new Error(`Error de API Gemini: ${response.status} ${response.statusText}. ${errorData.error?.message || ''}`);
                 }
                 const result = await response.json();
-                if (result.candidates && result.candidates.length > 0 &&
-                    result.candidates[0].content && result.candidates[0].content.parts &&
-                    result.candidates[0].content.parts.length > 0) {
-                    return result.candidates[0].content.parts[0].text;
-                } else {
-                    console.error('Respuesta inesperada de API Gemini Text:', result);
-                    throw new Error('Respuesta inesperada o vacía de la API de texto.');
-                }
+                if (result.candidates?.[0]?.content?.parts?.[0]?.text) return result.candidates[0].content.parts[0].text;
+                console.error('Respuesta inesperada de API Gemini Text:', result);
+                if (result.promptFeedback?.blockReason) throw new Error(`Contenido bloqueado por Gemini: ${result.promptFeedback.blockReason}`);
+                throw new Error('Respuesta inesperada o vacía de la API de texto Gemini.');
             } catch (error) {
                 console.error('Error al llamar a Gemini Text API:', error);
-                showModal('messageModal', 'Error de IA', `No se pudo generar el texto: ${error.message}. Verifica tu clave API y la consola para más detalles.`);
+                showModal('messageModal', 'Error de IA (Texto)', `No se pudo generar el texto: ${error.message}.`);
                 return null;
             }
         }
 
-        async function callImagenAPI(promptContent, negativePromptText) {
-            const userApiKey = apiKeyInput.value.trim();
-            const apiKey = userApiKey || ""; // Use user-provided key or fallback
-
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+        /**
+         * Calls the Imagen API to generate images.
+         * @param {string} promptContent - The text prompt for the image generation API.
+         * @returns {Promise<string[]|null>} A promise that resolves to an array of Base64 image strings or null if an error occurs.
+         */
+        async function callImagenAPI(promptContent) {
+            const currentApiKey = UIElements.apiKeyInput ? UIElements.apiKeyInput.value.trim() : '';
+            // Warn if the example key is still being used, as it often has limitations
+            if (!currentApiKey || currentApiKey === "") { 
+                showModal('messageModal', 'Error de Configuración', 'Por favor, ingresa tu PROPIA Clave API de Google AI. La clave de ejemplo tiene limitaciones severas y no funcionará consistentemente para imágenes.');
+                return null;
+            }
+            // Construct the API URL for Imagen 3.0
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${currentApiKey}`; 
             
-            const payload = {
-                instances: [{ prompt: promptContent }],
-                parameters: { 
-                    sampleCount: 2, // Generate 2 images for variety
-                }
-            };
+            const parameters = { sampleCount: 1 }; // Request one image
+            const payload = { instances: [{ prompt: promptContent }], parameters: parameters };
+            
+            console.log("--------------------------------------------------");
+            console.log("Llamando a Imagen API...");
+            console.log("Endpoint:", apiUrl.replace(currentApiKey, "YOUR_API_KEY")); // Mask API key in console
+            console.log("Prompt Enviado:", promptContent);
 
             try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+
+                console.log(`Respuesta HTTP de Imagen API - Status: ${response.status}, StatusText: ${response.statusText}`);
+
+                const responseBodyText = await response.text(); // Read response as text first
+                console.log("Cuerpo de la Respuesta (Texto):", responseBodyText);
+
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    console.error('Error en API Imagen:', errorData);
-                    throw new Error(`Error de API de imagen: ${response.status} ${response.statusText}. ${errorData.error?.message || ''}`);
+                    let errorDetails = responseBodyText;
+                    try {
+                        const errorJson = JSON.parse(responseBodyText);
+                        errorDetails = errorJson.error?.message || JSON.stringify(errorJson.error) || responseBodyText;
+                    } catch (e) { /* Not JSON, use text */ }
+                    console.error('Error en la respuesta de Imagen API:', errorDetails);
+                    throw new Error(`Error de API Imagen: ${response.status} ${response.statusText}. Detalles: ${errorDetails}`);
                 }
-                const result = await response.json();
-                if (result.predictions && result.predictions.length > 0) {
-                    return result.predictions.map(p => p.bytesBase64Encoded);
+
+                const result = JSON.parse(responseBodyText); // Parse as JSON after checking response.ok
+                console.log('Respuesta JSON Parseada de Imagen API:', JSON.stringify(result, null, 2));
+
+                if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
+                    console.log("Predicción de imagen recibida exitosamente.");
+                    return result.predictions.map(p => p.bytesBase64Encoded); // Return array of Base64 strings
+                } else if (result.predictions && result.predictions.length > 0 && result.predictions[0].error) {
+                    // Handle errors specifically found within the prediction object
+                    console.error('Error DENTRO de la predicción de Imagen API:', result.predictions[0].error);
+                    throw new Error(`Error en predicción de Imagen: ${result.predictions[0].error.message || JSON.stringify(result.predictions[0].error)}`);
+                } else if (result.promptFeedback && result.promptFeedback.blockReason) {
+                    // Handle content moderation blocking
+                    let blockMessage = `El prompt fue bloqueado. Motivo: ${result.promptFeedback.blockReason}.`;
+                    if (result.promptFeedback.safetyRatings) {
+                        blockMessage += ` Clasificaciones de seguridad: ${JSON.stringify(result.promptFeedback.safetyRatings)}`;
+                    }
+                    console.warn(blockMessage);
+                    throw new Error(blockMessage);
                 } else {
-                     console.error('Respuesta inesperada de API Imagen:', result);
-                    throw new Error('Respuesta inesperada o vacía de la API de imagen.');
+                    // If no predictions and no explicit error/block reason, log the whole result
+                    console.error('Estructura de respuesta inesperada de API Imagen o predicciones vacías. Respuesta completa:', JSON.stringify(result, null, 2));
+                    throw new Error('Respuesta inesperada o predicciones vacías de la API de Imagen. ' +
+                                    'Esto suele indicar un problema con su Clave API (ej. incorrecta, sin permisos para Imagen, o facturación no habilitada en su proyecto de Google Cloud). ' +
+                                    'Por favor, revise la consola del navegador para la respuesta completa de la API y verifique la configuración de su proyecto en Google Cloud.');
                 }
+
             } catch (error) {
-                console.error('Error al llamar a Imagen API:', error);
-                showModal('messageModal', 'Error de IA', `No se pudieron generar las imágenes: ${error.message}. Verifica tu clave API y la consola para más detalles.`);
+                console.error('Error final en callImagenAPI:', error.name, error.message, error.stack);
+                showModal('messageModal', 'Error de IA (Imagen)', `No se pudieron generar imágenes: ${error.message}. Asegúrate de que tu clave API sea correcta, que la API de Imagen esté habilitada y la facturación activa en Google Cloud. Revisa la consola del navegador para más detalles técnicos.`);
                 return null;
+            } finally {
+                console.log("--------------------------------------------------");
             }
         }
 
-        // --- Event Handlers ---
+        /**
+         * Handles the expansion of the character's background story using Gemini Text API.
+         */
         async function handleExpandStory() {
-            const currentStory = charInputElements.charBackground.value;
-            if (!currentStory.trim()) {
-                showModal('messageModal', 'Información Requerida', 'Por favor, escribe un resumen de la historia de fondo primero.');
+            if(!charInputElements.charBackground || !UIElements.expandStoryBtn) return;
+            const currentStory = charInputElements.charBackground.value.trim();
+            if (!currentStory) {
+                showModal('messageModal', 'Información Requerida', 'Escribe un resumen de la historia de fondo primero.');
                 return;
             }
-            
-            toggleButtonLoader(expandStoryBtn, true);
-            const prompt = `Eres un escritor creativo. Expande la siguiente historia de fondo para un personaje de ficción. Hazla más detallada e interesante:\n\n"${currentStory}"`;
-            const expandedStory = await callGeminiTextAPI(prompt);
-            toggleButtonLoader(expandStoryBtn, false);
-
-            if (expandedStory) {
-                charInputElements.charBackground.value = expandedStory;
+            toggleButtonLoader(UIElements.expandStoryBtn, true);
+            const prompt = `Eres un escritor creativo. Expande la siguiente historia de fondo para un personaje de ficción. Hazla más detallada e interesante, manteniendo el idioma original del texto proporcionado:\n\n"${currentStory}"`;
+            const expandedStoryText = await callGeminiTextAPI(prompt); 
+            if (expandedStoryText) {
+                charInputElements.charBackground.value = expandedStoryText; 
                 showModal('messageModal', 'Éxito', 'Historia expandida por la IA.');
-                updatePromptPreview();
+                updatePromptPreview(); // Update prompt preview after text expansion
             }
+            toggleButtonLoader(UIElements.expandStoryBtn, false);
         }
 
-        async function handleGenerateSheet() {
-            const data = getCharacterData();
-            if (!data.charName || !data.charRace || !data.charClass) {
-                showModal('messageModal', 'Información Requerida', 'Por favor, completa al menos Nombre, Raza y Clase del personaje antes de generar imágenes.');
+        /**
+         * Handles the generation of a single character image using Imagen API.
+         */
+        async function handleGenerateSheet() { // Single Image
+            if(!UIElements.generateSheetBtn || !UIElements.generatedImagesSection || !UIElements.imageThumbnailsContainer ) return;
+            const data = getCharacterData(); 
+            // Validate if core character features are provided
+            if (!getCoreCharacterFeatures(data).replace("The described character", "").trim()) { 
+                showModal('messageModal', 'Información Requerida', 'Completa detalles visuales clave (Raza, Clase, Rasgos) antes de generar imágenes.');
                 return;
             }
-
-            toggleButtonLoader(generateSheetBtn, true);
-            generatedImagesSection.classList.remove('hidden');
-            imageThumbnailsContainer.innerHTML = '<div class="loader mx-auto my-4"></div><p class="w-full text-center text-slate-500">Generando imágenes...</p>';
-            noImagesMessage.classList.add('hidden');
+            toggleButtonLoader(UIElements.generateSheetBtn, true);
+            UIElements.generatedImagesSection.classList.remove('hidden'); // Show the single image section
+            UIElements.modelSheetImagesSection.classList.add('hidden'); // Hide model sheet section
+            // Display a loading indicator
+            UIElements.imageThumbnailsContainer.innerHTML = '<div class="loader mx-auto my-4"></div><p class="w-full text-center text-slate-500">Generando imagen...</p>';
+            if (UIElements.noImagesMessage) UIElements.noImagesMessage.classList.add('hidden');
             currentGeneratedImages = []; // Clear previous images
 
-            const prompt = promptPreview.textContent; // Use the full prompt preview for image generation
-            const negativePrompts = negativePromptsInput.value.trim();
-
-            const imagesBase64 = await callImagenAPI(prompt, negativePrompts);
-            toggleButtonLoader(generateSheetBtn, false);
-
-            imageThumbnailsContainer.innerHTML = ''; // Clear loader and message
-            if (imagesBase64 && imagesBase64.length > 0) {
-                currentGeneratedImages = imagesBase64; // Store generated images
-                imagesBase64.forEach((base64Data, index) => {
-                    const imageUrl = `data:image/png;base64,${base64Data}`;
-                    const img = document.createElement('img');
-                    img.src = imageUrl;
-                    img.alt = `Generated Character Image ${index + 1}`;
-                    img.classList.add('hover:scale-105', 'transform', 'transition-transform');
-                    img.onclick = () => showImagePreviewModal(imageUrl);
-                    imageThumbnailsContainer.appendChild(img);
-                });
-                showModal('messageModal', 'Éxito', 'Imágenes de personaje generadas correctamente.');
-            } else {
-                noImagesMessage.classList.remove('hidden');
-                showModal('messageModal', 'Error', 'No se pudieron generar imágenes. Inténtalo de nuevo o ajusta los parámetros.');
-            }
-        }
-
-        function handleExportSheet() {
-            const data = getCharacterData();
-            const filename = `${data.charName || 'personaje'}_ficha.json`;
-            const jsonString = JSON.stringify(data, null, 2);
+            const coreFeaturesForSingleImage = getCoreCharacterFeatures(data);
+            const imagePrompt = constructImageGenerationPrompt(data, "full character portrait, dynamic lighting, high detail", coreFeaturesForSingleImage);
             
-            const blob = new Blob([jsonString], { type: 'application/json' });
-            saveAs(blob, filename);
-            showModal('messageModal', 'Exportar Ficha', `Ficha de personaje exportada como "${filename}".`);
-        }
+            const imagesBase64 = await callImagenAPI(imagePrompt);
 
-        async function handleExportZip() {
-            const data = getCharacterData();
-            const charName = data.charName || 'personaje_desconocido';
-            const zip = new JSZip();
-
-            // 1. Add Markdown file
-            let markdownContent = `# Ficha de Personaje: ${data.charName || 'Sin Nombre'}\n\n`;
-            markdownContent += `## Información Básica\n`;
-            markdownContent += `- **Nombre:** ${data.charName || 'N/A'}\n`;
-            markdownContent += `- **Título/Apodo:** ${data.charTitle || 'N/A'}\n`;
-            markdownContent += `- **Raza/Especie:** ${data.charRace || 'N/A'}\n`;
-            markdownContent += `- **Ocupación/Clase:** ${data.charClass || 'N/A'}\n`;
-            markdownContent += `- **Historia de Fondo:**\n${data.charBackground ? data.charBackground.split('\n').map(line => `  ${line}`).join('\n') : '  N/A'}\n\n`;
-
-            markdownContent += `## Apariencia\n`;
-            markdownContent += `- **Altura:** ${data.charHeight || 'N/A'}\n`;
-            markdownContent += `- **Peso/Complexión:** ${data.charWeight || 'N/A'}\n`;
-            markdownContent += `- **Rasgos Distintivos:** ${data.charFeatures || 'N/A'}\n`;
-            markdownContent += `- **Vestimenta Típica:** ${data.charClothing || 'N/A'}\n`;
-            markdownContent += `- **Equipamiento/Accesorios:** ${data.charEquipment || 'N/A'}\n\n`;
-
-            markdownContent += `## Personalidad\n`;
-            markdownContent += `- **Rasgos de Personalidad:** ${data.charTraits || 'N/A'}\n`;
-            markdownContent += `- **Ideales:** ${data.charIdeals || 'N/A'}\n`;
-            markdownContent += `- **Defectos/Debilidades:** ${data.charFlaws || 'N/A'}\n`;
-            markdownContent += `- **Citas Memorables:**\n${data.charQuotes ? data.charQuotes.split('\n').map(line => `  "${line}"`).join('\n') : '  N/A'}\n\n`;
-
-            markdownContent += `## Configuración de IA Utilizada\n`;
-            markdownContent += `- **Estilo Artístico Seleccionado:** ${data.selectedArtStyle || 'N/A'}\n`;
-            markdownContent += `- **Prompts Negativos:** ${data.negativePrompts || 'N/A'}\n`;
-
-            zip.file(`${charName}_ficha.md`, markdownContent);
-
-            // 2. Add Images
-            if (currentGeneratedImages.length > 0) {
-                currentGeneratedImages.forEach((base64Data, index) => {
-                    // Remove the "data:image/png;base64," prefix
-                    const base64ImageContent = base64Data.split(',')[1];
-                    zip.file(`${charName}_imagen_${index + 1}.png`, base64ImageContent, { base64: true });
+            UIElements.imageThumbnailsContainer.innerHTML = ''; // Clear loading indicator
+            if (imagesBase64?.length) {
+                currentGeneratedImages = imagesBase64; 
+                imagesBase64.forEach((base64Data, index) => {
+                    const img = document.createElement('img');
+                    img.src = `data:image/png;base64,${base64Data}`;
+                    img.alt = `Generated Character Image ${index + 1}`;
+                    img.onclick = () => showImagePreviewModal(img.src);
+                    UIElements.imageThumbnailsContainer.appendChild(img);
                 });
             } else {
-                showModal('messageModal', 'Advertencia', 'No hay imágenes generadas para exportar en el ZIP. Solo se exportará la ficha.');
+                // Show message if no images were generated
+                if (UIElements.noImagesMessage) {
+                    UIElements.noImagesMessage.textContent = 'No se generó la imagen. Verifica tu clave API y los logs de la consola.';
+                    UIElements.noImagesMessage.classList.remove('hidden');
+                }
+            }
+            toggleButtonLoader(UIElements.generateSheetBtn, false);
+        }
+
+        /**
+         * Handles the generation of a detailed model sheet with multiple character views using Imagen API.
+         */
+        async function handleGenerateModelSheet() {
+            if(!UIElements.generateModelSheetBtn || !UIElements.modelSheetImagesSection || !UIElements.modelSheetThumbnailsContainer) return;
+            const data = getCharacterData();
+            if (!getCoreCharacterFeatures(data).replace("The described character", "").trim()) {
+                showModal('messageModal', 'Información Requerida', 'Completa detalles visuales clave (Raza, Clase, Rasgos) para la hoja de modelo.');
+                return;
             }
 
-            // 3. Generate and download the ZIP file
-            toggleButtonLoader(exportZipBtn, true);
+            toggleButtonLoader(UIElements.generateModelSheetBtn, true);
+            UIElements.modelSheetImagesSection.classList.remove('hidden'); // Show model sheet section
+            UIElements.generatedImagesSection.classList.add('hidden'); // Hide single image section
+            UIElements.modelSheetThumbnailsContainer.innerHTML = ''; // Clear previous model sheet images
+            if (UIElements.noModelSheetMessage) UIElements.noModelSheetMessage.classList.add('hidden');
+            currentModelSheetImages = {}; // Clear previous model sheet data
+
+            const consistentCoreCharacterString = getCoreCharacterFeatures(data);
+            
+            showModal('messageModal', 'Generando Hoja de Modelo', 
+                `Intentando maximizar la consistencia con una descripción base detallada:<br>
+                 "<i>${consistentCoreCharacterString}</i>".<br>
+                 (La API actual no soporta semillas para fijar variaciones).<br>
+                 Esto puede tardar varios minutos.`);
+
+            // Global status indicator for model sheet generation
+            const globalStatusContainer = document.createElement('div');
+            globalStatusContainer.className = 'col-span-full text-center p-4 space-y-2';
+            const globalStatusP = document.createElement('p');
+            globalStatusP.className = 'text-slate-600';
+            globalStatusP.textContent = `Generando hoja de modelo detallada (0 / ?)...`;
+            const globalLoader = document.createElement('div');
+            globalLoader.className = 'loader mx-auto';
+            globalStatusContainer.appendChild(globalLoader);
+            globalStatusContainer.appendChild(globalStatusP);
+            UIElements.modelSheetThumbnailsContainer.appendChild(globalStatusContainer);
+            
+            // Define the different views to generate for the model sheet
+            const viewsAndDetails = [
+                { name: "Frontal (Turnaround)", group: "Turnaround", prompt_detail: "full body standing, strictly front view, character facing directly forward, neutral expression, arms slightly apart, plain neutral background." },
+                { name: "Perfil Izq. (Turnaround)", group: "Turnaround", prompt_detail: "full body standing, strictly left profile view (character facing left), neutral expression, arms at sides, plain neutral background." },
+                { name: "Trasera (Turnaround)", group: "Turnaround", prompt_detail: "full body standing, strictly back view, character facing directly away, plain neutral background." },
+                { name: "Pose T (Proporciones)", group: "Proportions", prompt_detail: "full body, neutral T-pose (arms outstretched horizontally), character facing directly forward, anatomical reference style, plain gridded background." },
+                { name: "Detalle Vestimenta", group: "Details", prompt_detail: `close-up of clothing`},
+                { name: "Detalle Accesorio", group: "Details", prompt_detail: `close-up of equipment`},
+                { name: "Expresión: Neutral", group: "Expressions", prompt_detail: "headshot, neutral expression, character facing forward, detailed face, plain background." },
+                { name: "Expresión: Feliz", group: "Expressions", prompt_detail: "headshot, happy joyful expression, character facing forward, detailed face, plain background." },
+                { name: "Expresión: Triste", group: "Expressions", prompt_detail: "headshot, sad melancholic expression, character facing forward, detailed face, plain background." },
+                { name: "Expresión: Enojado", group: "Expressions", prompt_detail: "headshot, angry furious expression, character facing forward, detailed face, plain background." },
+                { name: "Pose: Acción", group: "Poses", prompt_detail: "full body, dynamic action pose (e.g., mid-combat, casting a spell), conveying energy, plain background." },
+                { name: "Pose: Relajada", group: "Poses", prompt_detail: "full body, relaxed or characteristic idle pose (e.g., leaning, arms crossed), plain background." },
+            ];
+            globalStatusP.textContent = `Generando hoja de modelo detallada (0 / ${viewsAndDetails.length})...`;
+
+            // Render placeholders for each view
+            let currentGroup = "";
+            viewsAndDetails.forEach(item => {
+                if (item.group && item.group !== currentGroup && UIElements.modelSheetThumbnailsContainer) {
+                    currentGroup = item.group;
+                    const groupHeader = document.createElement('h3');
+                    groupHeader.className = 'text-lg font-semibold text-slate-700 col-span-full mt-6 mb-2 border-b pb-1';
+                    groupHeader.textContent = currentGroup;
+                    UIElements.modelSheetThumbnailsContainer.appendChild(groupHeader);
+                }
+                const viewContainer = document.createElement('div');
+                viewContainer.id = `view-status-${item.name.toLowerCase().replace(/\s+/g, '-')}`;
+                viewContainer.className = 'model-sheet-view';
+                viewContainer.innerHTML = `<h3>${item.name}</h3><div class="loader"></div><p class="text-xs">Generando...</p>`;
+                if(UIElements.modelSheetThumbnailsContainer) UIElements.modelSheetThumbnailsContainer.appendChild(viewContainer);
+            });
+            
+            // Adjust loader for inline display with text
+            if(globalStatusContainer && globalStatusContainer.parentNode) { 
+                 globalLoader.classList.remove('mx-auto'); 
+                 globalLoader.classList.add('inline-block', 'mr-2', 'align-middle');
+                 globalStatusP.classList.add('inline-block', 'align-middle');
+            }
+
+            let viewsGeneratedCount = 0;
+            // Iterate and generate each view
+            for (const item of viewsAndDetails) {
+                const viewStatusDiv = document.getElementById(`view-status-${item.name.toLowerCase().replace(/\s+/g, '-')}`);
+                globalStatusP.textContent = `Generando hoja de modelo detallada (${viewsGeneratedCount} / ${viewsAndDetails.length})... "${item.name}"`;
+                
+                const itemPrompt = constructImageGenerationPrompt(data, item.prompt_detail, consistentCoreCharacterString);
+                
+                const imagesBase64Array = await callImagenAPI(itemPrompt);
+                
+                if (imagesBase64Array?.length) {
+                    const base64Data = imagesBase64Array[0];
+                    // Create a safe filename key for storing the image
+                    const safeImageName = `${item.group}_${item.name}`.toLowerCase().replace(/[^a-z0-9_]/gi, '_');
+                    currentModelSheetImages[safeImageName] = base64Data;
+                    
+                    const imageUrl = `data:image/png;base64,${base64Data}`;
+                    // Update the placeholder with the generated image
+                    if(viewStatusDiv) viewStatusDiv.innerHTML = `<h3>${item.name}</h3><img src="${imageUrl}" alt="${data.charName || 'personaje'} - ${item.name}" onclick="showImagePreviewModal('${imageUrl}')" class="cursor-pointer"><p class="text-xs text-slate-500">${item.group}</p>`;
+                } else {
+                    // Indicate generation failure for this specific view
+                    if(viewStatusDiv) viewStatusDiv.innerHTML = `<h3>${item.name}</h3><p class="text-xs text-red-500">Error al generar</p><p class="text-xs text-slate-500">${item.group}</p>`;
+                }
+                viewsGeneratedCount++;
+                globalStatusP.textContent = `Generando hoja de modelo detallada (${viewsGeneratedCount} / ${viewsAndDetails.length})...`;
+            }
+            
+            // Remove global status indicator once all views are attempted
+            if(globalStatusContainer && globalStatusContainer.parentNode) globalStatusContainer.remove();
+
+            // Provide final feedback on generation success/failure
+            if (Object.keys(currentModelSheetImages).length === 0 && UIElements.noModelSheetMessage) {
+                 if(UIElements.noModelSheetMessage) UIElements.noModelSheetMessage.classList.remove('hidden');
+                 showModal('messageModal', 'Fallo Total', 'No se pudo generar ninguna imagen para la hoja de modelo. Verifica tu clave API y los logs de la consola.');
+            } else if (Object.keys(currentModelSheetImages).length < viewsAndDetails.length) {
+                showModal('messageModal', 'Resultado Parcial', `Se generaron ${Object.keys(currentModelSheetImages).length} de ${viewsAndDetails.length} imágenes. Algunas vistas no pudieron generarse. Revisa la consola.`);
+            } else {
+                showModal('messageModal', 'Éxito', `Hoja de modelo detallada generada con ${viewsAndDetails.length} imágenes. ¡Revisa los resultados!`);
+            }
+            
+            toggleButtonLoader(UIElements.generateModelSheetBtn, false);
+        }
+
+        /**
+         * Exports the current character data as a JSON file.
+         */
+        function handleExportSheet() {
+            if(!UIElements.exportSheetBtn) return; 
+            const data = getCharacterData();
+            // Create a safe filename from the character name
+            const filename = `${(data.charName || 'personaje').replace(/[^a-z0-9_]/gi, '_').toLowerCase()}_ficha.json`;
+            const jsonString = JSON.stringify(data, null, 2); // Pretty print JSON
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            saveAs(blob, filename); // Uses FileSaver.js to prompt download
+            showModal('messageModal', 'Exportar Ficha', `Ficha de personaje (JSON) exportada como "${filename}".`);
+        }
+
+        /**
+         * Exports all character data (JSON, generated single image, and model sheet images) into a ZIP file.
+         */
+        async function handleExportZip() {
+            if(!UIElements.exportZipBtn) return; 
+            const data = getCharacterData();
+            const safeCharName = (data.charName || 'personaje_desconocido').replace(/[^a-z0-9_]/gi, '_').toLowerCase();
+            const zip = new JSZip(); // Initialize JSZip instance
+            
+            // Add character data as a Markdown file to the ZIP
+            let markdownContent = `# Ficha de Personaje: ${data.charName || 'Sin Nombre'}\n\n`;
+            charFields.forEach(fieldKey => {
+                const fieldLabel = fieldKey.replace('char', '').replace(/([A-Z])/g, ' $1').trim(); // Format field name
+                markdownContent += `- **${fieldLabel}:** ${data[fieldKey] || 'N/A'}\n`;
+            });
+            markdownContent += `\n## Configuración de IA Utilizada\n- **Estilo Artístico:** ${data.selectedArtStyle || 'N/A'}\n`;
+            markdownContent += `- **Descripción Base (Core Features):** "${getCoreCharacterFeatures(data)}"\n`;
+            zip.file(`${safeCharName}_ficha_completa.md`, markdownContent);
+
+            // Add generated single images to the ZIP
+            if (currentGeneratedImages.length > 0) { 
+                const mainImageFolder = zip.folder("imagen_principal");
+                currentGeneratedImages.forEach((b64, i) => mainImageFolder.file(`${safeCharName}_principal_${i + 1}.png`, b64, { base64: true }));
+            }
+            
+            // Add generated model sheet images to the ZIP
+            if (Object.keys(currentModelSheetImages).length > 0) {
+                const modelSheetFolder = zip.folder("hoja_de_modelo_detallada");
+                for (const imageNameKey in currentModelSheetImages) { 
+                    modelSheetFolder.file(`${imageNameKey}.png`, currentModelSheetImages[imageNameKey], { base64: true });
+                }
+            }
+
+            toggleButtonLoader(UIElements.exportZipBtn, true); // Show loader
             try {
-                const content = await zip.generateAsync({ type: "blob" });
-                saveAs(content, `${charName}_datos.zip`);
-                showModal('messageModal', 'Exportar a ZIP', `Datos del personaje exportados como "${charName}_datos.zip".`);
+                const content = await zip.generateAsync({ type: "blob" }); // Generate the ZIP file
+                saveAs(content, `${safeCharName}_paquete_completo_personaje.zip`); // Save the ZIP file
+                showModal('messageModal', 'Exportar a ZIP', `Datos exportados como "${safeCharName}_paquete_completo_personaje.zip".`);
             } catch (error) {
-                console.error('Error al generar el archivo ZIP:', error);
-                showModal('messageModal', 'Error', `No se pudo generar el archivo ZIP: ${error.message}.`);
+                showModal('messageModal', 'Error de ZIP', `No se pudo generar el ZIP: ${error.message}.`);
             } finally {
-                toggleButtonLoader(exportZipBtn, false);
+                toggleButtonLoader(UIElements.exportZipBtn, false); // Hide loader
             }
         }
 
+        /**
+         * Handles the import of character data from a JSON string.
+         */
         function handleImportSheet() {
+            if(!UIElements.importJsonTextarea || !UIElements.importSection) return;
+            const jsonString = UIElements.importJsonTextarea.value;
+             if (!jsonString.trim()) {
+                showModal('messageModal', 'Error de Importación', 'El área de texto para importar está vacía.');
+                return;
+            }
             try {
-                const jsonString = importJsonTextarea.value;
-                const importedData = JSON.parse(jsonString);
-                setCharacterData(importedData);
-                importSection.classList.add('hidden'); // Hide import section after loading
+                const importedData = JSON.parse(jsonString); // Parse the JSON string
+                if (typeof importedData !== 'object' || importedData === null) {
+                     throw new Error("El JSON no es un objeto válido.");
+                }
+                setCharacterData(importedData); // Populate form with imported data
+                UIElements.importJsonTextarea.value = ''; // Clear textarea
+                UIElements.importSection.classList.add('hidden'); // Hide import section
+                showModal('messageModal', 'Éxito', 'Ficha de personaje cargada correctamente.');
             } catch (error) {
-                showModal('messageModal', 'Error de Importación', `Error al parsear el JSON: ${error.message}. Asegúrate de que el formato sea correcto.`);
-                console.error('Error importing sheet:', error);
+                showModal('messageModal', 'Error de Importación', `Error al parsear el JSON: ${error.message}.`);
             }
         }
     </script>
