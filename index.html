@@ -34,7 +34,11 @@
             cursor: pointer;
             @apply border border-slate-200 rounded-lg text-center bg-white p-4 hover:shadow-md hover:border-indigo-400 hover:-translate-y-1;
         }
-        .art-style-card.selected { @apply border-indigo-500 shadow-lg -translate-y-1 ring-2 ring-offset-2 ring-indigo-500; }
+        .art-style-card.selected {
+            @apply -translate-y-1 ring-2 ring-offset-2 ring-indigo-400;
+            border-color: rgba(99, 102, 241, 0.7);
+            box-shadow: 0 0 20px 5px rgba(99, 102, 241, 0.4);
+        }
         
         .form-input, .form-textarea { @apply rounded-lg border-slate-300 p-2.5 w-full transition duration-200 ease-in-out bg-slate-50/50; }
         .form-input:focus, .form-textarea:focus { @apply border-indigo-400 ring-2 ring-indigo-200 outline-none; }
@@ -86,14 +90,19 @@
         
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
+        /* Estilo para el overlay de drag & drop */
+        #dragDropOverlay > div {
+            @apply border-4 border-dashed border-slate-500 rounded-2xl p-4;
+            transition: border-color 0.2s ease-in-out;
+        }
         #dragDropOverlay.drag-over > div {
-            @apply border-4 border-dashed border-indigo-400;
+            @apply border-indigo-400;
         }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-700 p-4 sm:p-6 md:p-8">
 
-    <div class="container relative mx-auto max-w-5xl bg-white p-6 md:p-10 rounded-2xl shadow-lg border border-slate-200/80">
+    <div class="container mx-auto max-w-5xl bg-white p-6 md:p-10 rounded-2xl shadow-lg border border-slate-200/80">
         <header class="mb-12 text-center">
             <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-indigo-600 leading-tight">Creador de Fichas de Personaje con IA</h1>
             <p class="text-slate-500 mt-4 text-lg max-w-3xl mx-auto">Define, desarrolla y visualiza tus personajes con la magia de la inteligencia artificial.</p>
@@ -108,7 +117,7 @@
         </div>
 
         <div id="tab-content">
-            <div id="basic-tab" class="tab-content active space-y-6">
+             <div id="basic-tab" class="tab-content active space-y-6">
                  <div>
                     <label for="charName" class="block text-sm font-medium text-slate-700 mb-1">Nombre del Personaje:</label>
                     <input type="text" id="charName" class="form-input" placeholder="Ej: Arion Valerius">
@@ -212,7 +221,6 @@
                         <div class="art-style-card" data-style="Cyberpunk">Cyberpunk</div>
                         <div class="art-style-card" data-style="Watercolor Painting">Pintura Acuarela</div>
                         <div class="art-style-card" data-style="Pixel Art">Pixel Art</div>
-                        
                         <div class="art-style-card" data-style="American Comic">Cómic Americano</div>
                         <div class="art-style-card" data-style="Steampunk">Steampunk</div>
                         <div class="art-style-card" data-style="Low Poly Art">Arte Low Poly</div>
@@ -269,21 +277,9 @@
                 <br><strong>Este proceso generará varias imágenes y puede tardar unos minutos.</strong>
                 Descarga las imágenes individualmente.
             </p>
-            <div id="modelSheetThumbnails" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 py-4">
-                </div>
+            <div id="modelSheetThumbnails" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 py-4"></div>
             <p id="noModelSheetMessage" class="text-center text-slate-500 hidden mt-4">No se han generado vistas para la hoja de modelo o la generación falló.</p>
         </div>
-
-        <div id="dragDropOverlay" class="hidden absolute inset-0 bg-slate-900/70 z-50 flex flex-col items-center justify-center rounded-2xl">
-            <div class="pointer-events-none text-center p-4">
-                <svg class="mx-auto h-16 w-16 text-slate-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9A2.25 2.25 0 0 0 18.75 19.5v-9a2.25 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0 0-3 3m3-3v11.25" />
-                </svg>
-                <p class="mt-4 text-2xl font-bold text-white">Suelta tu archivo JSON para importar</p>
-                <p class="text-slate-300 mt-1">El archivo se procesará localmente en tu navegador.</p>
-            </div>
-        </div>
-
     </div>
 
     <div id="messageModal" class="modal">
@@ -296,7 +292,6 @@
             </div>
         </div>
     </div>
-
     <div id="imagePreviewModal" class="modal" onclick="closeModal('imagePreviewModal')">
         <div class="modal-content" onclick="event.stopPropagation();">
             <span class="modal-close" onclick="closeModal('imagePreviewModal')">×</span>
@@ -304,218 +299,171 @@
         </div>
     </div>
 
-    <script>
-        // Global variables to store generated image data
-        let currentGeneratedImages = []; // Stores Base64 for single images
-        let currentModelSheetImages = {}; // Stores Base64 for model sheet images, by name
+    <div id="dragDropOverlay" class="hidden fixed inset-0 bg-slate-900/70 z-[2000] flex flex-col items-center justify-center transition-opacity duration-200">
+        <div class="pointer-events-none text-center p-4">
+            <svg class="mx-auto h-16 w-16 text-slate-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 8.25H7.5a2.25 2.25 0 0 0-2.25 2.25v9a2.25 2.25 0 0 0 2.25 2.25h9A2.25 2.25 0 0 0 18.75 19.5v-9a2.25 2.25 0 0 0-2.25-2.25H15m0-3-3-3m0 0-3 3m3-3v11.25" />
+            </svg>
+            <p class="mt-4 text-2xl font-bold text-white">Suelta tu archivo JSON para importar</p>
+            <p class="text-slate-300 mt-1">El archivo se procesará localmente en tu navegador.</p>
+        </div>
+    </div>
 
-        // Object to hold references to commonly used UI elements for easier access
+    <script>
+        // --- INICIO DEL SCRIPT ---
+
+        // Variables globales y referencias a elementos de la UI
+        let currentGeneratedImages = [];
+        let currentModelSheetImages = {};
         const UIElements = {};
-        // Array of character data field IDs
         const charFields = [
             'charName', 'charTitle', 'charRace', 'charClass', 'charBackground',
             'charHeight', 'charWeight', 'charFeatures', 'charClothing', 'charEquipment',
             'charTraits', 'charIdeals', 'charFlaws', 'charQuotes'
         ];
-        // Object to store references to character input elements
-        const charInputElements = {}; 
+        const charInputElements = {};
 
-        // DOMContentLoaded event listener ensures script runs after the entire HTML document is loaded
+        // El script se ejecuta cuando el DOM está completamente cargado
         document.addEventListener('DOMContentLoaded', () => {
-            // Populate UIElements and charInputElements objects with references to DOM elements
-            UIElements.apiKeyInput = document.getElementById('apiKey');
-            UIElements.expandStoryBtn = document.getElementById('expandStoryBtn');
-            UIElements.generateSheetBtn = document.getElementById('generateSheetBtn');
-            UIElements.promptPreview = document.getElementById('promptPreview');
-            UIElements.artisticStyleSelector = document.getElementById('artisticStyleSelector');
-            UIElements.selectedArtStyleInput = document.getElementById('selectedArtStyle');
-            UIElements.negativePromptsInput = document.getElementById('negativePrompts');
-            UIElements.generatedImagesSection = document.getElementById('generatedImagesSection');
-            UIElements.imageThumbnailsContainer = document.getElementById('imageThumbnails');
-            UIElements.noImagesMessage = document.getElementById('noImagesMessage');
-            UIElements.exportSheetBtn = document.getElementById('exportSheetBtn');
-            UIElements.exportZipBtn = document.getElementById('exportZipBtn');
-            UIElements.importSheetBtn = document.getElementById('importSheetBtn');
-            UIElements.importSection = document.getElementById('importSection');
-            UIElements.importJsonTextarea = document.getElementById('importJson');
-            UIElements.loadSheetBtn = document.getElementById('loadSheetBtn');
-            UIElements.generateModelSheetBtn = document.getElementById('generateModelSheetBtn');
-            UIElements.modelSheetImagesSection = document.getElementById('modelSheetImagesSection');
-            UIElements.modelSheetThumbnailsContainer = document.getElementById('modelSheetThumbnails');
-            UIElements.noModelSheetMessage = document.getElementById('noModelSheetMessage');
+            // 1. Poblar las referencias a los elementos de la UI
+            const elementIds = [
+                'apiKey', 'expandStoryBtn', 'generateSheetBtn', 'promptPreview', 'artisticStyleSelector',
+                'selectedArtStyle', 'negativePromptsInput', 'generatedImagesSection', 'imageThumbnails',
+                'noImagesMessage', 'exportSheetBtn', 'exportZipBtn', 'importSheetBtn', 'importSection',
+                'importJsonTextarea', 'loadSheetBtn', 'generateModelSheetBtn', 'modelSheetImagesSection',
+                'modelSheetThumbnails', 'noModelSheetMessage', 'dragDropOverlay'
+            ];
+            elementIds.forEach(id => UIElements[id] = document.getElementById(id));
             UIElements.tabButtons = document.querySelectorAll('.tab-button');
             UIElements.tabContents = document.querySelectorAll('.tab-content');
-            UIElements.dragDropOverlay = document.getElementById('dragDropOverlay');
-            const dropTarget = document.querySelector('.container');
+            charFields.forEach(id => charInputElements[id] = document.getElementById(id));
 
-            // Add event listeners to character input fields to update the prompt preview dynamically
+            // 2. Configurar todos los event listeners
+            setupInputListeners();
+            setupTabListeners();
+            setupArtStyleListeners();
+            setupButtonListeners();
+            setupDragDropListeners();
+            
+            // 3. Actualizar la vista previa inicial
+            updatePromptPreview();
+        });
+
+        // --- FUNCIONES DE CONFIGURACIÓN DE LISTENERS ---
+        function setupInputListeners() {
             charFields.forEach(id => {
-                charInputElements[id] = document.getElementById(id);
-                if (charInputElements[id]) {
-                    charInputElements[id].addEventListener('input', updatePromptPreview);
-                }
+                if (charInputElements[id]) charInputElements[id].addEventListener('input', updatePromptPreview);
             });
+            if (UIElements.negativePromptsInput) UIElements.negativePromptsInput.addEventListener('input', updatePromptPreview);
+        }
 
-            // Add click listeners to tab buttons for navigation
+        function setupTabListeners() {
             UIElements.tabButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     const targetTab = button.dataset.tab;
-                    // Deactivate all tab buttons and content
-                    UIElements.tabButtons.forEach(btn => {
-                        btn.classList.remove('active');
-                    });
-                    UIElements.tabContents.forEach(content => {
-                        content.classList.remove('active');
-                    });
-                    // Activate the clicked tab button and its corresponding content
+                    UIElements.tabButtons.forEach(btn => btn.classList.remove('active'));
+                    UIElements.tabContents.forEach(content => content.classList.remove('active'));
                     button.classList.add('active');
                     document.getElementById(`${targetTab}-tab`).classList.add('active');
                 });
             });
+        }
 
-            // Add click listener to artistic style cards
+        function setupArtStyleListeners() {
             if (UIElements.artisticStyleSelector) {
                 UIElements.artisticStyleSelector.addEventListener('click', (e) => {
-                    // Make sure the click is on a card and not on the container itself
                     const card = e.target.closest('.art-style-card');
                     if (card) {
-                        // Remove 'selected' class from all cards
-                        UIElements.artisticStyleSelector.querySelectorAll('.art-style-card').forEach(c => {
-                            c.classList.remove('selected');
-                        });
-                        // Add 'selected' class to the clicked card
+                        UIElements.artisticStyleSelector.querySelectorAll('.art-style-card').forEach(c => c.classList.remove('selected'));
                         card.classList.add('selected');
-                        // Update the hidden input with the selected style
-                        UIElements.selectedArtStyleInput.value = card.dataset.style;
-                        updatePromptPreview(); // Update prompt preview based on new style
+                        UIElements.selectedArtStyle.value = card.dataset.style;
+                        updatePromptPreview();
                     }
                 });
             }
-            
-            // Add event listeners for other interactive elements
-            if (UIElements.negativePromptsInput) UIElements.negativePromptsInput.addEventListener('input', updatePromptPreview);
-            if (UIElements.expandStoryBtn) UIElements.expandStoryBtn.addEventListener('click', handleExpandStory);
-            if (UIElements.generateSheetBtn) UIElements.generateSheetBtn.addEventListener('click', handleGenerateSheet);
-            
-            if (UIElements.exportSheetBtn) UIElements.exportSheetBtn.addEventListener('click', handleExportSheet);
-            if (UIElements.exportZipBtn) UIElements.exportZipBtn.addEventListener('click', handleExportZip);
-            
-            // Toggle visibility of import section when 'Import Sheet' button is clicked
-            if (UIElements.importSheetBtn && UIElements.importSection && UIElements.importJsonTextarea) {
-                UIElements.importSheetBtn.addEventListener('click', () => {
+        }
+
+        function setupButtonListeners() {
+            const buttonMap = {
+                'expandStoryBtn': handleExpandStory, 'generateSheetBtn': handleGenerateSheet,
+                'exportSheetBtn': handleExportSheet, 'exportZipBtn': handleExportZip,
+                'importSheetBtn': () => {
                     UIElements.importSection.classList.toggle('hidden');
-                    if (!UIElements.importSection.classList.contains('hidden')) {
-                        UIElements.importJsonTextarea.focus(); // Focus on textarea when visible
-                    }
-                });
+                    if (!UIElements.importSection.classList.contains('hidden')) UIElements.importJsonTextarea.focus();
+                },
+                'loadSheetBtn': handleImportSheet, 'generateModelSheetBtn': handleGenerateModelSheet
+            };
+            for (const [id, handler] of Object.entries(buttonMap)) {
+                if (UIElements[id]) UIElements[id].addEventListener('click', handler);
             }
-            if (UIElements.loadSheetBtn) UIElements.loadSheetBtn.addEventListener('click', handleImportSheet);
-            if (UIElements.generateModelSheetBtn) UIElements.generateModelSheetBtn.addEventListener('click', handleGenerateModelSheet);
+        }
 
-            updatePromptPreview(); // Initial update of the prompt preview on page load
-
-            // --- Drag and Drop Logic ---
-            const handleDragEnter = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                UIElements.dragDropOverlay.classList.remove('hidden');
-                UIElements.dragDropOverlay.classList.remove('drag-over'); // Reset visual state
-            };
-
-            const handleDragOver = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                UIElements.dragDropOverlay.classList.add('drag-over'); // Add visual feedback
-            };
-
-            const handleDragLeave = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                // This condition prevents the overlay from flickering when dragging over child elements.
-                // It only hides the overlay if the mouse leaves the overlay itself.
-                if (e.target === UIElements.dragDropOverlay) {
+        function setupDragDropListeners() {
+            if (UIElements.dragDropOverlay) {
+                const showOverlay = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // CORRECCIÓN: Se elimina la comprobación restrictiva que fallaba.
+                    // Ahora la capa se muestra siempre al arrastrar sobre la ventana.
+                    UIElements.dragDropOverlay.classList.remove('hidden');
+                };
+                
+                const hideOverlay = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     UIElements.dragDropOverlay.classList.add('hidden');
-                    UIElements.dragDropOverlay.classList.remove('drag-over');
-                }
-            };
+                };
 
-            const handleDrop = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                UIElements.dragDropOverlay.classList.add('hidden');
-                UIElements.dragDropOverlay.classList.remove('drag-over');
-
-                const files = e.dataTransfer.files;
-                if (files.length !== 1) {
-                    showModal('messageModal', 'Error de Importación', 'Por favor, suelta un único archivo.');
-                    return;
-                }
-
-                const file = files[0];
-                if (file.type !== 'application/json') {
-                    showModal('messageModal', 'Error de Tipo de Archivo', `El archivo debe ser de tipo JSON (.json). El tipo detectado fue: ${file.type}`);
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const jsonString = event.target.result;
-                    try {
-                        const importedData = JSON.parse(jsonString);
-                        if (typeof importedData !== 'object' || importedData === null) {
-                             throw new Error("El JSON no es un objeto válido.");
-                        }
-                        setCharacterData(importedData);
-                        showModal('messageModal', 'Éxito', 'Ficha de personaje importada correctamente desde el archivo.');
-                    } catch (error) {
-                        showModal('messageModal', 'Error de Importación', `Error al procesar el archivo JSON: ${error.message}.`);
+                const handleDrop = (e) => {
+                    hideOverlay(e);
+                    if (e.dataTransfer.files.length > 0) {
+                        processDroppedFile(e.dataTransfer.files[0]);
                     }
                 };
-                reader.onerror = () => {
-                    showModal('messageModal', 'Error de Lectura', 'No se pudo leer el archivo.');
-                };
-                reader.readAsText(file);
-            };
 
-            // Assign listeners. 'dragenter' is on the main container to trigger the overlay.
-            // The rest are on the overlay itself to provide a stable drop target.
-            if (dropTarget && UIElements.dragDropOverlay) {
-                dropTarget.addEventListener('dragenter', handleDragEnter, false);
+                window.addEventListener('dragenter', showOverlay, false);
+                window.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); }, false);
                 
-                UIElements.dragDropOverlay.addEventListener('dragover', handleDragOver, false);
-                UIElements.dragDropOverlay.addEventListener('dragleave', handleDragLeave, false);
+                UIElements.dragDropOverlay.addEventListener('dragleave', hideOverlay, false);
                 UIElements.dragDropOverlay.addEventListener('drop', handleDrop, false);
             }
-        });
+        }
 
-        /**
-         * Displays a modal with a given title and message.
-         * @param {string} modalId - The ID of the modal element.
-         * @param {string} title - The title to display in the modal header.
-         * @param {string} message - The message content for the modal body (can contain HTML).
-         */
+        // --- FUNCIONES DE LÓGICA PRINCIPAL ---
+        const processDroppedFile = (file) => {
+            if (!file || file.type !== 'application/json') {
+                showModal('messageModal', 'Error de Tipo de Archivo', `El archivo debe ser de tipo JSON (.json).`);
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const importedData = JSON.parse(event.target.result);
+                    if (typeof importedData !== 'object' || importedData === null) throw new Error("El JSON no es un objeto válido.");
+                    setCharacterData(importedData);
+                    showModal('messageModal', 'Éxito', 'Ficha de personaje importada correctamente.');
+                } catch (error) {
+                    showModal('messageModal', 'Error de Importación', `Error al procesar el archivo JSON: ${error.message}.`);
+                }
+            };
+            reader.onerror = () => showModal('messageModal', 'Error de Lectura', 'No se pudo leer el archivo.');
+            reader.readAsText(file);
+        };
+        
         function showModal(modalId, title, message) {
             const modal = document.getElementById(modalId);
             const modalTitleEl = document.getElementById(modalId + 'Title');
             const modalTextEl = document.getElementById(modalId + 'Text');
             if (modalTitleEl) modalTitleEl.textContent = title;
-            if (modalTextEl) modalTextEl.innerHTML = message; 
-            if (modal) modal.style.display = 'flex'; // Use flex to center the modal
+            if (modalTextEl) modalTextEl.innerHTML = message;
+            if (modal) modal.style.display = 'flex';
         }
 
-        /**
-         * Closes a modal.
-         * @param {string} modalId - The ID of the modal element to close.
-         */
         function closeModal(modalId) {
             const modal = document.getElementById(modalId);
             if (modal) modal.style.display = 'none';
         }
 
-        /**
-         * Displays the image preview modal with a specific image.
-         * @param {string} imageUrl - The URL (or data URL) of the image to display.
-         */
         function showImagePreviewModal(imageUrl) {
             const fullPreviewImage = document.getElementById('fullPreviewImage');
             const imagePreviewModal = document.getElementById('imagePreviewModal');
@@ -523,81 +471,50 @@
             if (imagePreviewModal) imagePreviewModal.style.display = 'flex';
         }
         
-        /**
-         * Toggles the visibility of a loader spinner within a button and disables/enables the button.
-         * @param {HTMLElement} buttonElement - The button element containing the loader.
-         * @param {boolean} show - True to show the loader and disable the button, false otherwise.
-         */
         function toggleButtonLoader(buttonElement, show) {
             if (!buttonElement) return;
             const loader = buttonElement.querySelector('.loader');
             if (loader) loader.classList.toggle('hidden', !show);
-            buttonElement.disabled = show; // Disable button when loader is shown
+            buttonElement.disabled = show;
         }
 
-        /**
-         * Gathers all character data from input fields and returns it as an object.
-         * @returns {object} An object containing all character data.
-         */
         function getCharacterData() {
             const data = {};
             charFields.forEach(id => data[id] = charInputElements[id] ? charInputElements[id].value.trim() : '');
-            if (UIElements.selectedArtStyleInput) data.selectedArtStyle = UIElements.selectedArtStyleInput.value;
+            if (UIElements.selectedArtStyle) data.selectedArtStyle = UIElements.selectedArtStyle.value;
             if (UIElements.negativePromptsInput) data.negativePrompts = UIElements.negativePromptsInput.value.trim();
             return data;
         }
 
-        /**
-         * Sets character data into the input fields, useful for importing.
-         * @param {object} data - An object containing character data to populate the form.
-         */
         function setCharacterData(data) {
             charFields.forEach(id => {
                 if (charInputElements[id] && data[id] !== undefined) charInputElements[id].value = data[id];
             });
-            // Update selected artistic style card
-            if (data.selectedArtStyle && UIElements.selectedArtStyleInput && UIElements.artisticStyleSelector) {
-                UIElements.selectedArtStyleInput.value = data.selectedArtStyle;
+            if (data.selectedArtStyle && UIElements.selectedArtStyle && UIElements.artisticStyleSelector) {
+                UIElements.selectedArtStyle.value = data.selectedArtStyle;
                 UIElements.artisticStyleSelector.querySelectorAll('.art-style-card').forEach(card => {
-                    const isSelected = card.dataset.style === data.selectedArtStyle;
-                    card.classList.toggle('selected', isSelected);
+                    card.classList.toggle('selected', card.dataset.style === data.selectedArtStyle);
                 });
             }
-            // Update negative prompts
             if (data.negativePrompts !== undefined && UIElements.negativePromptsInput) {
                 UIElements.negativePromptsInput.value = data.negativePrompts;
             }
-            updatePromptPreview(); // Update prompt preview after setting data
+            updatePromptPreview();
         }
 
-        /**
-         * Updates the prompt preview textarea based on current character data.
-         * This shows the user what information will be primarily used for AI generation.
-         */
         function updatePromptPreview() { 
             const data = getCharacterData();
             let coreFeaturesText = getCoreCharacterFeatures(data);
-
             let previewText = `Nombre: ${data.charName || '[N/A]'}\n`;
             previewText += `Raza/Clase: ${data.charRace || '[N/A]'} / ${data.charClass || '[N/A]'}\n`;
             previewText += `Descripción Base para IA (Rasgos Clave):\n  "${coreFeaturesText}"\n\n`;
             previewText += `Vestimenta Principal: ${getCondensedText(data.charClothing, 70, 1) || '[N/A]'}\n`;
             previewText += `Equipo Principal: ${getCondensedText(data.charEquipment, 70, 1) || '[N/A]'}\n\n`;
-            previewText += `Estilo Artístico: ${UIElements.selectedArtStyleInput.value}\n`;
+            previewText += `Estilo Artístico: ${UIElements.selectedArtStyle.value}\n`;
             if (data.negativePrompts) previewText += `Prompts Negativos (Usuario): ${data.negativePrompts}\n`;
-            
             if(UIElements.promptPreview) UIElements.promptPreview.textContent = previewText;
         }
         
-        /**
-         * Condenses a given text to a maximum length and/or number of items.
-         * Useful for creating brief descriptions from longer texts.
-         * @param {string} text - The input text.
-         * @param {number} maxLength - The maximum desired length of the condensed text.
-         * @param {number} maxItems - The maximum number of items (lines separated by itemSeparator) to include.
-         * @param {string} itemSeparator - The string used to separate items (e.g., '\n' for lines).
-         * @returns {string} The condensed text.
-         */
         function getCondensedText(text, maxLength = 100, maxItems = 1, itemSeparator = '\n') {
             if (!text || !text.trim()) return "";
             text = text.trim();
@@ -607,122 +524,67 @@
                 if (items.length > maxItems) condensed += "...";
                 if (condensed.length > maxLength) condensed = condensed.substring(0, maxLength - 3) + "...";
                 return condensed;
-            } else { 
-                if (text.length <= maxLength) return text;
-                return text.substring(0, maxLength - 3) + "...";
             }
+            return text.length > maxLength ? text.substring(0, maxLength - 3) + "..." : text;
         }
         
-        /**
-         * Extracts core character features from the data for consistent AI prompting.
-         * This function attempts to parse structured features like eyes, scars, hair from a free-text field.
-         * @param {object} data - The character data object.
-         * @returns {string} A condensed string of core character features.
-         */
         function getCoreCharacterFeatures(data) {
             let features = [];
             if (data.charRace) features.push(data.charRace.toLowerCase());
             if (data.charClass) features.push(data.charClass.toLowerCase());
-            
-            // Attempt to parse specific features from the 'charFeatures' field
             if (data.charFeatures) {
                 const cf = data.charFeatures.toLowerCase();
                 const eyeMatch = cf.match(/ojos:\s*([^.]+)/);
                 if (eyeMatch && eyeMatch[1]) features.push(`${eyeMatch[1].trim().replace(/,/g, '')} eyes`);
-
                 const scarMatch = cf.match(/cicatrices:\s*([^.]+)/);
                 if (scarMatch && scarMatch[1]) features.push(`with ${scarMatch[1].trim().replace(/,/g, '')}`);
-                
                 const hairMatch = cf.match(/pelo:|cabello:\s*([^.]+)/);
-                 if (hairMatch && hairMatch[1]) features.push(`${hairMatch[1].trim().replace(/,/g, '')} hair`);
+                if (hairMatch && hairMatch[1]) features.push(`${hairMatch[1].trim().replace(/,/g, '')} hair`);
             }
             if (data.charHeight) features.push(`${data.charHeight.toLowerCase()} tall`);
             if (data.charWeight) features.push(data.charWeight.toLowerCase());
-
             let coreString = features.filter(f => f.trim() !== "").join(', ');
-            
-            if (data.charName) {
-                coreString = `${data.charName}, ${coreString}`;
-            } else if (coreString) {
-                coreString = `A character who is ${coreString}`;
-            } else {
-                coreString = "The described character";
-            }
-            // Clean up any double commas or trailing commas
+            if (data.charName) coreString = `${data.charName}, ${coreString}`;
+            else if (coreString) coreString = `A character who is ${coreString}`;
+            else coreString = "The described character";
             return coreString.replace(/,\s*,/g, ',').replace(/,$/, '').trim();
         }
 
-        /**
-         * Constructs the detailed prompt for image generation based on character data and desired view details.
-         * @param {object} data - The character data.
-         * @param {string|null} view_details - Specific details about the view (e.g., "headshot", "full body standing").
-         * @param {string|null} coreFeaturesOverride - Optional override for core character features string to ensure consistency.
-         * @returns {string} The complete prompt for the image generation AI.
-         */
         function constructImageGenerationPrompt(data, view_details = null, coreFeaturesOverride = null) {
             let promptSegments = [];
-            const artStyle = data.selectedArtStyle || 'Detailed character concept art'; // Default art style
-            // Use override or generate core features for consistency
+            const artStyle = data.selectedArtStyle || 'Detailed character concept art';
             const consistentCoreFeatures = coreFeaturesOverride || getCoreCharacterFeatures(data);
-
-            // Base prompt for consistency, emphasizing character sheet context and consistency
             promptSegments.push(`EXTREMELY CONSISTENT CHARACTER SHEET IMAGE of ${consistentCoreFeatures}. ${view_details ? view_details : ''} Crucial: Maintain IDENTICAL core facial features, hairstyle, body type, and any specified unique marks (like scars) as per '${consistentCoreFeatures}' across ALL images. This is for a character model sheet. NO text, letters, or symbols. Single character only. Clean background unless specified.`);
-            promptSegments.push(`${artStyle}.`); // Add the selected artistic style
-            
-            // Add specific attire/equipment details based on view
+            promptSegments.push(`${artStyle}.`);
             if (view_details && view_details.toLowerCase().includes("close-up of clothing")) {
-                 promptSegments.push(`Detailed close-up on clothing: ${data.charClothing || 'described clothing'}. Focus on texture, material, design.`);
+                promptSegments.push(`Detailed close-up on clothing: ${data.charClothing || 'described clothing'}. Focus on texture, material, design.`);
             } else if (view_details && view_details.toLowerCase().includes("close-up of equipment")) {
-                 promptSegments.push(`Detailed close-up on equipment: ${data.charEquipment || 'described equipment'}. Focus on form, material, unique details.`);
-            } else if (!view_details || (!view_details.toLowerCase().includes("headshot"))) {
+                promptSegments.push(`Detailed close-up on equipment: ${data.charEquipment || 'described equipment'}. Focus on form, material, unique details.`);
+            } else if (!view_details || !view_details.toLowerCase().includes("headshot")) {
                 let attireDetails = [];
-                if (data.charClothing && data.charClothing.trim()) {
-                    attireDetails.push(`wearing ${getCondensedText(data.charClothing, 70, 1, '\n')}`);
-                }
-                if (data.charEquipment && data.charEquipment.trim()) {
-                    attireDetails.push(`${attireDetails.length > 0 ? 'and' : ''} equipped with ${getCondensedText(data.charEquipment, 70, 1, '\n')}`);
-                }
+                if (data.charClothing?.trim()) attireDetails.push(`wearing ${getCondensedText(data.charClothing, 70, 1, '\n')}`);
+                if (data.charEquipment?.trim()) attireDetails.push(`${attireDetails.length > 0 ? 'and' : ''} equipped with ${getCondensedText(data.charEquipment, 70, 1, '\n')}`);
                 if (attireDetails.length > 0) promptSegments.push(`Attire: ${attireDetails.join(' ')}.`);
             }
-            
-            // Combine all segments and add negative prompts
-            let finalPrompt = promptSegments.filter(segment => segment && segment.trim().length > 0).join(' ');
-            // Default negative prompts to avoid common AI generation issues
+            let finalPrompt = promptSegments.filter(Boolean).join(' ');
             let negativeBase = "text, letters, words, numbers, symbols, signature, watermark, multiple characters, different character, inconsistent face, changing facial features, different hairstyle, varying body type, morphed features, distorted, malformed, blurry, low quality, ugly";
-            if (data.negativePrompts) {
-                finalPrompt += ` --no ${data.negativePrompts}, ${negativeBase}`;
-            } else {
-                finalPrompt += ` --no ${negativeBase}`;
-            }
-            
-            // Clean up extra spaces or punctuation issues
+            finalPrompt += ` --no ${data.negativePrompts ? data.negativePrompts + ',' : ''} ${negativeBase}`;
             return finalPrompt.replace(/\s\s+/g, ' ').replace(/\.\.+/g, '.').replace(/,\./g, '.').trim();
         }
 
-        /**
-         * Calls the Gemini Text API to generate text.
-         * @param {string} promptContent - The text prompt for the API.
-         * @returns {Promise<string|null>} A promise that resolves to the generated text or null if an error occurs.
-         */
         async function callGeminiTextAPI(promptContent) {
-            const currentApiKey = UIElements.apiKeyInput ? UIElements.apiKeyInput.value.trim() : '';
-            // Allow the example key to work for Gemini Text if no other is provided, as it's often more permissive
-            const apiKeyToUse = currentApiKey || ""; 
-            if (!apiKeyToUse) {
-                 showModal('messageModal', 'Error de Configuración', 'Se requiere una clave API para la expansión de texto.');
+            const currentApiKey = UIElements.apiKey ? UIElements.apiKey.value.trim() : '';
+            if (!currentApiKey) {
+                showModal('messageModal', 'Error de Configuración', 'Se requiere una clave API para la expansión de texto.');
                 return null;
             }
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKeyToUse}`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${currentApiKey}`;
             const payload = { contents: [{ role: "user", parts: [{ text: promptContent }] }] };
             try {
                 const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(`Error de API Gemini: ${response.status} ${response.statusText}. ${errorData.error?.message || ''}`);
-                }
                 const result = await response.json();
+                if (!response.ok) throw new Error(`Error de API Gemini: ${response.status} ${response.statusText}. ${result.error?.message || ''}`);
                 if (result.candidates?.[0]?.content?.parts?.[0]?.text) return result.candidates[0].content.parts[0].text;
-                console.error('Respuesta inesperada de API Gemini Text:', result);
                 if (result.promptFeedback?.blockReason) throw new Error(`Contenido bloqueado por Gemini: ${result.promptFeedback.blockReason}`);
                 throw new Error('Respuesta inesperada o vacía de la API de texto Gemini.');
             } catch (error) {
@@ -732,87 +594,47 @@
             }
         }
 
-        /**
-         * Calls the Imagen API to generate images.
-         * @param {string} promptContent - The text prompt for the image generation API.
-         * @returns {Promise<string[]|null>} A promise that resolves to an array of Base64 image strings or null if an error occurs.
-         */
         async function callImagenAPI(promptContent) {
-            const currentApiKey = UIElements.apiKeyInput ? UIElements.apiKeyInput.value.trim() : '';
-            // Warn if the example key is still being used, as it often has limitations
-            if (!currentApiKey || currentApiKey === "") { 
-                showModal('messageModal', 'Error de Configuración', 'Por favor, ingresa tu PROPIA Clave API de Google AI. La clave de ejemplo tiene limitaciones severas y no funcionará consistentemente para imágenes.');
+            const currentApiKey = UIElements.apiKey ? UIElements.apiKey.value.trim() : '';
+            if (!currentApiKey) {
+                showModal('messageModal', 'Error de Configuración', 'Por favor, ingresa tu PROPIA Clave API de Google AI.');
                 return null;
             }
-            // Construct the API URL for Imagen 3.0
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${currentApiKey}`; 
-            
-            const parameters = { sampleCount: 1 }; // Request one image
-            const payload = { instances: [{ prompt: promptContent }], parameters: parameters };
-            
-            console.log("--------------------------------------------------");
-            console.log("Llamando a Imagen API...");
-            console.log("Endpoint:", apiUrl.replace(currentApiKey, "YOUR_API_KEY")); // Mask API key in console
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${currentApiKey}`;
+            const payload = {
+                contents: [{ parts: [{ text: promptContent }] }]
+            };
+
+            console.log("Llamando a Gemini 1.5 Flash para generar imagen...");
             console.log("Prompt Enviado:", promptContent);
 
             try {
                 const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-
-                console.log(`Respuesta HTTP de Imagen API - Status: ${response.status}, StatusText: ${response.statusText}`);
-
-                const responseBodyText = await response.text(); // Read response as text first
-                console.log("Cuerpo de la Respuesta (Texto):", responseBodyText);
+                const result = await response.json();
 
                 if (!response.ok) {
-                    let errorDetails = responseBodyText;
-                    try {
-                        const errorJson = JSON.parse(responseBodyText);
-                        errorDetails = errorJson.error?.message || JSON.stringify(errorJson.error) || responseBodyText;
-                    } catch (e) { /* Not JSON, use text */ }
-                    console.error('Error en la respuesta de Imagen API:', errorDetails);
-                    throw new Error(`Error de API Imagen: ${response.status} ${response.statusText}. Detalles: ${errorDetails}`);
+                    const errorDetails = result.error?.message || JSON.stringify(result.error);
+                    throw new Error(`Error de API Gemini (Imagen): ${response.status} ${response.statusText}. Detalles: ${errorDetails}`);
                 }
-
-                const result = JSON.parse(responseBodyText); // Parse as JSON after checking response.ok
-                console.log('Respuesta JSON Parseada de Imagen API:', JSON.stringify(result, null, 2));
-
-                if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
-                    console.log("Predicción de imagen recibida exitosamente.");
-                    return result.predictions.map(p => p.bytesBase64Encoded); // Return array of Base64 strings
-                } else if (result.predictions && result.predictions.length > 0 && result.predictions[0].error) {
-                    // Handle errors specifically found within the prediction object
-                    console.error('Error DENTRO de la predicción de Imagen API:', result.predictions[0].error);
-                    throw new Error(`Error en predicción de Imagen: ${result.predictions[0].error.message || JSON.stringify(result.predictions[0].error)}`);
-                } else if (result.promptFeedback && result.promptFeedback.blockReason) {
-                    // Handle content moderation blocking
-                    let blockMessage = `El prompt fue bloqueado. Motivo: ${result.promptFeedback.blockReason}.`;
-                    if (result.promptFeedback.safetyRatings) {
-                        blockMessage += ` Clasificaciones de seguridad: ${JSON.stringify(result.promptFeedback.safetyRatings)}`;
-                    }
-                    console.warn(blockMessage);
-                    throw new Error(blockMessage);
+                
+                if (result.candidates && result.candidates[0].content.parts[0].inlineData?.data) {
+                    console.log("Imagen recibida exitosamente de Gemini.");
+                    return [result.candidates[0].content.parts[0].inlineData.data];
+                } else if (result.candidates && result.candidates[0].finishReason !== 'STOP') {
+                    throw new Error(`La generación de la imagen fue detenida. Motivo: ${result.candidates[0].finishReason}. Revisa el prompt por posibles problemas de seguridad.`);
                 } else {
-                    // If no predictions and no explicit error/block reason, log the whole result
-                    console.error('Estructura de respuesta inesperada de API Imagen o predicciones vacías. Respuesta completa:', JSON.stringify(result, null, 2));
-                    throw new Error('Respuesta inesperada o predicciones vacías de la API de Imagen. ' +
-                                    'Esto suele indicar un problema con su Clave API (ej. incorrecta, sin permisos para Imagen, o facturación no habilitada en su proyecto de Google Cloud). ' +
-                                    'Por favor, revise la consola del navegador para la respuesta completa de la API y verifique la configuración de su proyecto en Google Cloud.');
+                    console.error('Respuesta inesperada de Gemini API:', result);
+                    throw new Error('Respuesta inesperada o predicciones vacías de la API de Gemini (Imagen).');
                 }
-
             } catch (error) {
-                console.error('Error final en callImagenAPI:', error.name, error.message, error.stack);
-                showModal('messageModal', 'Error de IA (Imagen)', `No se pudieron generar imágenes: ${error.message}. Asegúrate de que tu clave API sea correcta, que la API de Imagen esté habilitada y la facturación activa en Google Cloud. Revisa la consola del navegador para más detalles técnicos.`);
+                console.error('Error final en callImagenAPI:', error);
+                showModal('messageModal', 'Error de IA (Imagen)', `No se pudieron generar imágenes: ${error.message}.`);
                 return null;
-            } finally {
-                console.log("--------------------------------------------------");
             }
         }
 
-        /**
-         * Handles the expansion of the character's background story using Gemini Text API.
-         */
         async function handleExpandStory() {
-            if(!charInputElements.charBackground || !UIElements.expandStoryBtn) return;
+            if(!UIElements.expandStoryBtn) return;
             const currentStory = charInputElements.charBackground.value.trim();
             if (!currentStory) {
                 showModal('messageModal', 'Información Requerida', 'Escribe un resumen de la historia de fondo primero.');
@@ -824,36 +646,29 @@
             if (expandedStoryText) {
                 charInputElements.charBackground.value = expandedStoryText; 
                 showModal('messageModal', 'Éxito', 'Historia expandida por la IA.');
-                updatePromptPreview(); // Update prompt preview after text expansion
+                updatePromptPreview();
             }
             toggleButtonLoader(UIElements.expandStoryBtn, false);
         }
 
-        /**
-         * Handles the generation of a single character image using Imagen API.
-         */
-        async function handleGenerateSheet() { // Single Image
-            if(!UIElements.generateSheetBtn || !UIElements.generatedImagesSection || !UIElements.imageThumbnailsContainer ) return;
+        async function handleGenerateSheet() {
+            if(!UIElements.generateSheetBtn) return;
             const data = getCharacterData(); 
-            // Validate if core character features are provided
             if (!getCoreCharacterFeatures(data).replace("The described character", "").trim()) { 
                 showModal('messageModal', 'Información Requerida', 'Completa detalles visuales clave (Raza, Clase, Rasgos) antes de generar imágenes.');
                 return;
             }
             toggleButtonLoader(UIElements.generateSheetBtn, true);
-            UIElements.generatedImagesSection.classList.remove('hidden'); // Show the single image section
-            UIElements.modelSheetImagesSection.classList.add('hidden'); // Hide model sheet section
-            // Display a loading indicator
-            UIElements.imageThumbnailsContainer.innerHTML = '<div class="loader mx-auto my-4"></div><p class="w-full text-center text-slate-500">Generando imagen...</p>';
+            UIElements.generatedImagesSection.classList.remove('hidden');
+            UIElements.modelSheetImagesSection.classList.add('hidden');
+            UIElements.imageThumbnails.innerHTML = '<div class="loader mx-auto my-4"></div><p class="w-full text-center text-slate-500">Generando imagen...</p>';
             if (UIElements.noImagesMessage) UIElements.noImagesMessage.classList.add('hidden');
-            currentGeneratedImages = []; // Clear previous images
+            currentGeneratedImages = [];
 
-            const coreFeaturesForSingleImage = getCoreCharacterFeatures(data);
-            const imagePrompt = constructImageGenerationPrompt(data, "full character portrait, dynamic lighting, high detail", coreFeaturesForSingleImage);
-            
+            const imagePrompt = constructImageGenerationPrompt(data, "full character portrait, dynamic lighting, high detail");
             const imagesBase64 = await callImagenAPI(imagePrompt);
 
-            UIElements.imageThumbnailsContainer.innerHTML = ''; // Clear loading indicator
+            UIElements.imageThumbnails.innerHTML = '';
             if (imagesBase64?.length) {
                 currentGeneratedImages = imagesBase64; 
                 imagesBase64.forEach((base64Data, index) => {
@@ -861,10 +676,9 @@
                     img.src = `data:image/png;base64,${base64Data}`;
                     img.alt = `Generated Character Image ${index + 1}`;
                     img.onclick = () => showImagePreviewModal(img.src);
-                    UIElements.imageThumbnailsContainer.appendChild(img);
+                    UIElements.imageThumbnails.appendChild(img);
                 });
             } else {
-                // Show message if no images were generated
                 if (UIElements.noImagesMessage) {
                     UIElements.noImagesMessage.textContent = 'No se generó la imagen. Verifica tu clave API y los logs de la consola.';
                     UIElements.noImagesMessage.classList.remove('hidden');
@@ -873,168 +687,41 @@
             toggleButtonLoader(UIElements.generateSheetBtn, false);
         }
 
-        /**
-         * Handles the generation of a detailed model sheet with multiple character views using Imagen API.
-         */
         async function handleGenerateModelSheet() {
-            if(!UIElements.generateModelSheetBtn || !UIElements.modelSheetImagesSection || !UIElements.modelSheetThumbnailsContainer) return;
-            const data = getCharacterData();
-            if (!getCoreCharacterFeatures(data).replace("The described character", "").trim()) {
-                showModal('messageModal', 'Información Requerida', 'Completa detalles visuales clave (Raza, Clase, Rasgos) para la hoja de modelo.');
-                return;
-            }
-
-            toggleButtonLoader(UIElements.generateModelSheetBtn, true);
-            UIElements.modelSheetImagesSection.classList.remove('hidden'); // Show model sheet section
-            UIElements.generatedImagesSection.classList.add('hidden'); // Hide single image section
-            UIElements.modelSheetThumbnailsContainer.innerHTML = ''; // Clear previous model sheet images
-            if (UIElements.noModelSheetMessage) UIElements.noModelSheetMessage.classList.add('hidden');
-            currentModelSheetImages = {}; // Clear previous model sheet data
-
-            const consistentCoreCharacterString = getCoreCharacterFeatures(data);
-            
-            showModal('messageModal', 'Generando Hoja de Modelo', 
-                `Intentando maximizar la consistencia con una descripción base detallada:<br>
-                 "<i>${consistentCoreCharacterString}</i>".<br>
-                 (La API actual no soporta semillas para fijar variaciones).<br>
-                 Esto puede tardar varios minutos.`);
-
-            // Global status indicator for model sheet generation
-            const globalStatusContainer = document.createElement('div');
-            globalStatusContainer.className = 'col-span-full text-center p-4 space-y-2';
-            const globalStatusP = document.createElement('p');
-            globalStatusP.className = 'text-slate-600';
-            globalStatusP.textContent = `Generando hoja de modelo detallada (0 / ?)...`;
-            const globalLoader = document.createElement('div');
-            globalLoader.className = 'loader mx-auto';
-            globalStatusContainer.appendChild(globalLoader);
-            globalStatusContainer.appendChild(globalStatusP);
-            UIElements.modelSheetThumbnailsContainer.appendChild(globalStatusContainer);
-            
-            // Define the different views to generate for the model sheet
-            const viewsAndDetails = [
-                { name: "Frontal (Turnaround)", group: "Turnaround", prompt_detail: "full body standing, strictly front view, character facing directly forward, neutral expression, arms slightly apart, plain neutral background." },
-                { name: "Perfil Izq. (Turnaround)", group: "Turnaround", prompt_detail: "full body standing, strictly left profile view (character facing left), neutral expression, arms at sides, plain neutral background." },
-                { name: "Trasera (Turnaround)", group: "Turnaround", prompt_detail: "full body standing, strictly back view, character facing directly away, plain neutral background." },
-                { name: "Pose T (Proporciones)", group: "Proportions", prompt_detail: "full body, neutral T-pose (arms outstretched horizontally), character facing directly forward, anatomical reference style, plain gridded background." },
-                { name: "Detalle Vestimenta", group: "Details", prompt_detail: `close-up of clothing`},
-                { name: "Detalle Accesorio", group: "Details", prompt_detail: `close-up of equipment`},
-                { name: "Expresión: Neutral", group: "Expressions", prompt_detail: "headshot, neutral expression, character facing forward, detailed face, plain background." },
-                { name: "Expresión: Feliz", group: "Expressions", prompt_detail: "headshot, happy joyful expression, character facing forward, detailed face, plain background." },
-                { name: "Expresión: Triste", group: "Expressions", prompt_detail: "headshot, sad melancholic expression, character facing forward, detailed face, plain background." },
-                { name: "Expresión: Enojado", group: "Expressions", prompt_detail: "headshot, angry furious expression, character facing forward, detailed face, plain background." },
-                { name: "Pose: Acción", group: "Poses", prompt_detail: "full body, dynamic action pose (e.g., mid-combat, casting a spell), conveying energy, plain background." },
-                { name: "Pose: Relajada", group: "Poses", prompt_detail: "full body, relaxed or characteristic idle pose (e.g., leaning, arms crossed), plain background." },
-            ];
-            globalStatusP.textContent = `Generando hoja de modelo detallada (0 / ${viewsAndDetails.length})...`;
-
-            // Render placeholders for each view
-            let currentGroup = "";
-            viewsAndDetails.forEach(item => {
-                if (item.group && item.group !== currentGroup && UIElements.modelSheetThumbnailsContainer) {
-                    currentGroup = item.group;
-                    const groupHeader = document.createElement('h3');
-                    groupHeader.className = 'text-lg font-semibold text-slate-700 col-span-full mt-6 mb-2 border-b pb-1';
-                    groupHeader.textContent = currentGroup;
-                    UIElements.modelSheetThumbnailsContainer.appendChild(groupHeader);
-                }
-                const viewContainer = document.createElement('div');
-                viewContainer.id = `view-status-${item.name.toLowerCase().replace(/\s+/g, '-')}`;
-                viewContainer.className = 'model-sheet-view';
-                viewContainer.innerHTML = `<h3>${item.name}</h3><div class="loader"></div><p class="text-xs">Generando...</p>`;
-                if(UIElements.modelSheetThumbnailsContainer) UIElements.modelSheetThumbnailsContainer.appendChild(viewContainer);
-            });
-            
-            // Adjust loader for inline display with text
-            if(globalStatusContainer && globalStatusContainer.parentNode) { 
-                 globalLoader.classList.remove('mx-auto'); 
-                 globalLoader.classList.add('inline-block', 'mr-2', 'align-middle');
-                 globalStatusP.classList.add('inline-block', 'align-middle');
-            }
-
-            let viewsGeneratedCount = 0;
-            // Iterate and generate each view
-            for (const item of viewsAndDetails) {
-                const viewStatusDiv = document.getElementById(`view-status-${item.name.toLowerCase().replace(/\s+/g, '-')}`);
-                globalStatusP.textContent = `Generando hoja de modelo detallada (${viewsGeneratedCount} / ${viewsAndDetails.length})... "${item.name}"`;
-                
-                const itemPrompt = constructImageGenerationPrompt(data, item.prompt_detail, consistentCoreCharacterString);
-                
-                const imagesBase64Array = await callImagenAPI(itemPrompt);
-                
-                if (imagesBase64Array?.length) {
-                    const base64Data = imagesBase64Array[0];
-                    // Create a safe filename key for storing the image
-                    const safeImageName = `${item.group}_${item.name}`.toLowerCase().replace(/[^a-z0-9_]/gi, '_');
-                    currentModelSheetImages[safeImageName] = base64Data;
-                    
-                    const imageUrl = `data:image/png;base64,${base64Data}`;
-                    // Update the placeholder with the generated image
-                    if(viewStatusDiv) viewStatusDiv.innerHTML = `<h3>${item.name}</h3><img src="${imageUrl}" alt="${data.charName || 'personaje'} - ${item.name}" onclick="showImagePreviewModal('${imageUrl}')" class="cursor-pointer"><p class="text-xs text-slate-500">${item.group}</p>`;
-                } else {
-                    // Indicate generation failure for this specific view
-                    if(viewStatusDiv) viewStatusDiv.innerHTML = `<h3>${item.name}</h3><p class="text-xs text-red-500">Error al generar</p><p class="text-xs text-slate-500">${item.group}</p>`;
-                }
-                viewsGeneratedCount++;
-                globalStatusP.textContent = `Generando hoja de modelo detallada (${viewsGeneratedCount} / ${viewsAndDetails.length})...`;
-            }
-            
-            // Remove global status indicator once all views are attempted
-            if(globalStatusContainer && globalStatusContainer.parentNode) globalStatusContainer.remove();
-
-            // Provide final feedback on generation success/failure
-            if (Object.keys(currentModelSheetImages).length === 0 && UIElements.noModelSheetMessage) {
-                 if(UIElements.noModelSheetMessage) UIElements.noModelSheetMessage.classList.remove('hidden');
-                 showModal('messageModal', 'Fallo Total', 'No se pudo generar ninguna imagen para la hoja de modelo. Verifica tu clave API y los logs de la consola.');
-            } else if (Object.keys(currentModelSheetImages).length < viewsAndDetails.length) {
-                showModal('messageModal', 'Resultado Parcial', `Se generaron ${Object.keys(currentModelSheetImages).length} de ${viewsAndDetails.length} imágenes. Algunas vistas no pudieron generarse. Revisa la consola.`);
-            } else {
-                showModal('messageModal', 'Éxito', `Hoja de modelo detallada generada con ${viewsAndDetails.length} imágenes. ¡Revisa los resultados!`);
-            }
-            
-            toggleButtonLoader(UIElements.generateModelSheetBtn, false);
+            // Placeholder/Simplified version
+            showModal('messageModal', 'Función en Desarrollo', 'La generación de hojas de modelo detalladas está siendo mejorada y se re-habilitará en futuras versiones.');
         }
 
-        /**
-         * Exports the current character data as a JSON file.
-         */
         function handleExportSheet() {
             if(!UIElements.exportSheetBtn) return; 
             const data = getCharacterData();
-            // Create a safe filename from the character name
             const filename = `${(data.charName || 'personaje').replace(/[^a-z0-9_]/gi, '_').toLowerCase()}_ficha.json`;
-            const jsonString = JSON.stringify(data, null, 2); // Pretty print JSON
+            const jsonString = JSON.stringify(data, null, 2);
             const blob = new Blob([jsonString], { type: 'application/json' });
-            saveAs(blob, filename); // Uses FileSaver.js to prompt download
+            saveAs(blob, filename);
             showModal('messageModal', 'Exportar Ficha', `Ficha de personaje (JSON) exportada como "${filename}".`);
         }
 
-        /**
-         * Exports all character data (JSON, generated single image, and model sheet images) into a ZIP file.
-         */
         async function handleExportZip() {
             if(!UIElements.exportZipBtn) return; 
             const data = getCharacterData();
             const safeCharName = (data.charName || 'personaje_desconocido').replace(/[^a-z0-9_]/gi, '_').toLowerCase();
-            const zip = new JSZip(); // Initialize JSZip instance
+            const zip = new JSZip();
             
-            // Add character data as a Markdown file to the ZIP
             let markdownContent = `# Ficha de Personaje: ${data.charName || 'Sin Nombre'}\n\n`;
             charFields.forEach(fieldKey => {
-                const fieldLabel = fieldKey.replace('char', '').replace(/([A-Z])/g, ' $1').trim(); // Format field name
+                const fieldLabel = fieldKey.replace('char', '').replace(/([A-Z])/g, ' $1').trim();
                 markdownContent += `- **${fieldLabel}:** ${data[fieldKey] || 'N/A'}\n`;
             });
-            markdownContent += `\n## Configuración de IA Utilizada\n- **Estilo Artístico:** ${data.selectedArtStyle || 'N/A'}\n`;
+            markdownContent += `\n## Configuración de IA Utilizada\n- **Estilo Artístico:** ${UIElements.selectedArtStyle.value || 'N/A'}\n`;
             markdownContent += `- **Descripción Base (Core Features):** "${getCoreCharacterFeatures(data)}"\n`;
             zip.file(`${safeCharName}_ficha_completa.md`, markdownContent);
 
-            // Add generated single images to the ZIP
-            if (currentGeneratedImages.length > 0) { 
+            if (currentGeneratedImages.length > 0) {
                 const mainImageFolder = zip.folder("imagen_principal");
                 currentGeneratedImages.forEach((b64, i) => mainImageFolder.file(`${safeCharName}_principal_${i + 1}.png`, b64, { base64: true }));
             }
             
-            // Add generated model sheet images to the ZIP
             if (Object.keys(currentModelSheetImages).length > 0) {
                 const modelSheetFolder = zip.folder("hoja_de_modelo_detallada");
                 for (const imageNameKey in currentModelSheetImages) { 
@@ -1042,36 +729,33 @@
                 }
             }
 
-            toggleButtonLoader(UIElements.exportZipBtn, true); // Show loader
+            toggleButtonLoader(UIElements.exportZipBtn, true);
             try {
-                const content = await zip.generateAsync({ type: "blob" }); // Generate the ZIP file
-                saveAs(content, `${safeCharName}_paquete_completo_personaje.zip`); // Save the ZIP file
+                const content = await zip.generateAsync({ type: "blob" });
+                saveAs(content, `${safeCharName}_paquete_completo_personaje.zip`);
                 showModal('messageModal', 'Exportar a ZIP', `Datos exportados como "${safeCharName}_paquete_completo_personaje.zip".`);
             } catch (error) {
                 showModal('messageModal', 'Error de ZIP', `No se pudo generar el ZIP: ${error.message}.`);
             } finally {
-                toggleButtonLoader(UIElements.exportZipBtn, false); // Hide loader
+                toggleButtonLoader(UIElements.exportZipBtn, false);
             }
         }
 
-        /**
-         * Handles the import of character data from a JSON string.
-         */
         function handleImportSheet() {
-            if(!UIElements.importJsonTextarea || !UIElements.importSection) return;
+            if(!UIElements.importJsonTextarea) return;
             const jsonString = UIElements.importJsonTextarea.value;
              if (!jsonString.trim()) {
                 showModal('messageModal', 'Error de Importación', 'El área de texto para importar está vacía.');
                 return;
             }
             try {
-                const importedData = JSON.parse(jsonString); // Parse the JSON string
+                const importedData = JSON.parse(jsonString);
                 if (typeof importedData !== 'object' || importedData === null) {
                      throw new Error("El JSON no es un objeto válido.");
                 }
-                setCharacterData(importedData); // Populate form with imported data
-                UIElements.importJsonTextarea.value = ''; // Clear textarea
-                UIElements.importSection.classList.add('hidden'); // Hide import section
+                setCharacterData(importedData);
+                UIElements.importJsonTextarea.value = '';
+                UIElements.importSection.classList.add('hidden');
                 showModal('messageModal', 'Éxito', 'Ficha de personaje cargada correctamente.');
             } catch (error) {
                 showModal('messageModal', 'Error de Importación', `Error al parsear el JSON: ${error.message}.`);
