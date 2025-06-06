@@ -1,73 +1,90 @@
-✨ Creador de Fitxes de Personatge amb IA ✨
+# 🔮 Creador de Fitxes de Personatge amb IA
 
-Benvingut al Creador de Fitxes de Personatge amb IA! 🚀 Aquesta és la teva eina definitiva per donar vida als teus personatges de ficció, ja sigui per a jocs de rol, històries, novel·les o qualsevol univers creatiu que estiguis construint. Oblida't de les fulles de paper avorrides i submergeix-te en una experiència interactiva i visualment impactant, potenciada per la intel·ligència artificial. 🧠🎨
-🌟 Què és i Per Què l'Estimaràs?
+Benvingut/da al Creador de Fitxes de Personatge amb IA, una eina web dissenyada per a escriptors, directors de joc, artistes i qualsevol persona que vulgui donar vida als seus personatges d'una manera completament nova. Combina la teva creativitat amb el poder de la intel·ligència artificial de Google per definir, desenvolupar i, el més important, visualitzar els teus personatges com mai abans.
 
-Aquest programa és més que un simple formulari; és un company creatiu que t'ajuda a definir cada faceta dels teus personatges, des de la seva història de fons més profunda fins a la seva aparença més detallada. I el millor de tot: pot generar imatges sorprenents de les teves creacions amb només un clic! 🖼️✨
-Característiques Destacades:
+[Aquí va una captura de pantalla o un GIF impressionant de l'aplicació en funcionament!]
 
-    Definició Detallada de Personatges: Crea una fitxa completa amb informació bàsica, aparença i personalitat. 📝
+## ✨ Característiques Principals
 
-    Expansió d'Història amb IA: Bloc d'escriptor? Deixa que la IA t'ajudi a expandir i enriquir la història de fons del teu personatge amb només un botó. 💡
+* **Interfície Intuïtiva en Pestanyes:** Organitza la informació del teu personatge de manera clara i senzilla (Informació Bàsica, Aparença, Personalitat).
+* **Generació de Text amb IA:** Expandeix la història de fons del teu personatge amb un sol clic, afegint profunditat i detalls interessants gràcies a l'API de Gemini.
+* **Generació d'Imatges amb IA:** Visualitza el teu personatge!
+    * Crea **retrats únics i dinàmics** del teu personatge.
+    * Genera **fulls de model detallats** amb múltiples vistes (frontal, perfil, expressions, etc.).
+* **Ampla Selecció d'Estils Artístics:** Tria entre més de 20 estils artístics, des de "Retrat Fotorrealista" i "Còmic Americà" fins a "Art Gòtic" o "Vaporwave".
+* **Importació i Exportació Fàcil:**
+    * Guarda la teva fitxa completa en un arxiu `.json`.
+    * Exporta un paquet `.zip` que inclou la fitxa, les imatges generades i un resum en Markdown.
+    * Importa personatges enganxant el text JSON o simplement **arrossegant i deixant anar (Drag & Drop)** l'arxiu a l'aplicació.
+* **Disseny 100% Responsable:** Fes servir l'eina còmodament des del teu ordinador, tauleta o mòbil.
+* **Privacitat Primer:** Tot el procés es duu a terme al teu navegador. La teva clau API i les dades dels teus personatges no s'emmagatzemen enlloc.
 
-    Generació d'Imatges Impressionants: Visualitza els teus personatges amb l'ajuda de la IA de generació d'imatges, triant entre una varietat d'estils artístics (Concept Art, Animació Pixar, Cyberpunk i més). 🌈
+## 🚀 Tecnologies Utilitzades
 
-    Vista Prèvia de Prompt Dinàmica: Observa en temps real com les teves entrades es transformen en el "prompt" que la IA utilitzarà per generar el text i les imatges. 🔍
+* **Frontend:** HTML5, Tailwind CSS, JavaScript (vanilla).
+* **APIs d'IA:** Google AI Platform (API de Gemini i API d'Imagen).
+* **Utilitats:** JSZip, FileSaver.js.
 
-    Exportació i Importació de Fitxes: Guarda i carrega els teus personatges en format JSON per editar-los més tard o compartir-los amb amics. 💾📤📥
+## 🔧 Instal·lació i Configuració
 
-    ¡Exportació Completa a ZIP! Guarda tota la informació del teu personatge, incloent la fitxa en format Markdown (.md) i totes les imatges generades, en un pràctic arxiu ZIP. ¡Perfecte per arxivar o compartir la teva creació completa! 📦
+Aquesta aplicació és un únic arxiu estàtic, la qual cosa fa que la seva configuració sigui extremadament senzilla. No requereix cap _build step_ ni servidor.
 
-    Interfície Intuïtiva i Responsiva: Dissenyada amb Tailwind CSS per a una experiència d'usuari fluida en qualsevol dispositiu. 📱💻
+1.  **Descarregar el Projecte:**
+    Clona el repositori o simplement descarrega l'arxiu `index.html`.
+    ```bash
+    git clone [https://github.com/elteunom/elteurepositori.git](https://github.com/elteunom/elteurepositori.git)
+    ```
 
-💖 ¡Dona Vida a les Teves Idees!
+2.  **Obrir l'Arxiu:**
+    Obre l'arxiu `index.html` directament al teu navegador web preferit (Chrome, Firefox, Edge, etc.).
 
-Imagina això: tens una idea per a un heroi espacial, un elf místic o un detectiu d'un futur distòpic. Amb aquesta aplicació, pots començar amb una idea bàsica, deixar que la IA t'inspiri amb una història més rica i, en qüestió de segons, ¡tenir una representació visual del teu personatge en l'estil artístic que triïs! És la fusió perfecta entre la teva creativitat i el poder de la intel·ligència artificial. 🌟🚀
-🛠️ Com Usar
+3.  **Obtenir una Clau API de Google AI (Molt Important):**
+    Perquè la generació de text i imatges funcioni, necessites la teva pròpia clau API de Google.
+    * Ves a [Google AI Studio](https://aistudio.google.com/).
+    * Fes clic a "**Get API key**" i crea una nova clau en un projecte teu.
+    * Assegura't que el teu projecte de Google Cloud tingui l'**API "Generative Language"** (o l'API Vertex AI) habilitada.
+    * **La facturació ha d'estar activa** al teu projecte de Google Cloud perquè l'API d'imatges funcioni correctament. Google ofereix un nivell gratuït generós, però la facturació ha d'estar habilitada.
 
-    Navega per les Pestanyes: Omple la informació del teu personatge a les pestanyes "Informació Bàsica", "Aparença" i "Personalitat". ➡️
+## 🎮 Com Utilitzar l'Aplicació
 
-    Expandeix la teva Història (Opcional): Si tens una idea per a la història de fons, escriu-la al camp corresponent i fes clic a "✨ Expandir Història amb IA" per obtenir una versió més detallada. ✍️
+1.  **Enganxa la teva Clau API:** Introdueix la teva clau API de Google AI al camp corresponent.
+2.  **Defineix el teu Personatge:** Omple els camps a les pestanyes "Informació Bàsica", "Aparença" i "Personalitat". Com més detallat siguis, especialment en els **"Rasgos Distintivos"**, més consistents seran les imatges.
+3.  **Expandeix la Història (Opcional):** Si vols més detalls per al rerefons, escriu un resum i fes clic a "✨ Expandir Historia con IA".
+4.  **Selecciona un Estil i Genera!** Tria l'estil artístic que més t'agradi i fes clic en un dels botons de generació:
+    * `🔮 Generar Imagen Única` per a un retrat principal.
+    * `🎨 Generar Hoja de Modelo` per a un full de referència complet.
+5.  **Importa i Exporta:** Fes servir els botons d'importació (enganxant text o amb drag & drop) i exportació per guardar i compartir les teves creacions.
 
-    Configura la IA:
+## 🗺️ Full de Ruta i Millores Futures
 
-        Clau API: Si tens una clau API de Google AI (Gemini), introdueix-la al camp "Clau API de Google AI". Això millora la capacitat de la IA. 🔑
+Aquest projecte està en constant evolució! La nostra visió és convertir-lo en l'eina definitiva per a la creació de personatges.
 
-        Estil Artístic: Selecciona l'estil visual que desitges per a les imatges del teu personatge. 🎨
+### ⚠️ En Procés de Millora (Work in Progress)
 
-        Prompts Negatius: Afegeix paraules clau de coses que no vols veure a les teves imatges (ex: "borrós", "deformat"). 🚫
+* **Generació de Fulls de Model Detallats:** Aquesta és una de les funcionalitats més potents, però també la més complexa. Actualment, aconseguir una consistència facial i física perfecta entre les diferents vistes (frontal, perfil, esquena, expressions) és un repte tècnic amb les versions actuals de les APIs. **Considerem aquesta funcionalitat com a "experimental"**. Estem treballant activament en tècniques de _prompting_ avançat i explorant noves funcionalitats de l'API per millorar dràsticament la coherència en futures actualitzacions.
 
-    Genera el teu Personatge: Fes clic a "🔮 Generar Fitxa de Personatge (i Imatges)". L'aplicació utilitzarà la informació que has proporcionat per crear un prompt i generar dues imatges del teu personatge. 🚀
+### Pròximes Característiques
 
-    Visualitza les Imatges: Les imatges generades apareixeran a la secció "Imatges Generades". Pots fer clic en elles per veure una vista prèvia més gran. 👁️‍🗨️
+* **Mode Fosc:** Una interfície alternativa per a sessions de creativitat nocturnes.
+* **Desar Localment:** Guardar múltiples personatges directament al navegador (`localStorage`).
+* **Plantilles de Personatge:** Plantilles predefinides per a diferents gèneres (fantasia, ciència-ficció, D&D 5e, etc.).
+* **Localització:** Traducció completa de la interfície a altres idiomes.
 
-    Exporta la teva Creació:
+## 🙌 Com Contribuir
 
-        Fes clic a "📤 Exportar Fitxa (JSON)" per guardar només les dades del formulari.
+Les contribucions són més que benvingudes! Si tens idees per a noves funcionalitats, has trobat un error o vols millorar el codi, no dubtis a:
 
-        Fes clic a "📦 Exportar a ZIP" per descarregar un arxiu ZIP que conté la fitxa en Markdown i totes les imatges generades. ✅
+1.  Obrir una **Issue** per discutir el canvi.
+2.  Fer un **Fork** del projecte.
+3.  Crear una nova **branca** (`git checkout -b feature/NomDeLaMillora`).
+4.  Fer un **Commit** amb els teus canvis (`git commit -m 'Afegida nova funcionalitat increïble'`).
+5.  Fer **Push** a la teva branca (`git push origin feature/NomDeLaMillora`).
+6.  Obrir una **Pull Request**.
 
-    Importa les teves Fitxes: Si tens un arxiu JSON d'una fitxa anterior, pots utilitzar "📥 Importar Fitxa", enganxar el contingut i fer clic a "Carregar Fitxa". 📂
+## 📄 Llicència
 
-💻 Tecnologies Utilitzades
+Aquest projecte està sota la **Llicència MIT**. Consulta l'arxiu `LICENSE` per a més detalls.
 
-    HTML5: Estructura de l'aplicació. 🌐
+---
 
-    Tailwind CSS: Estils moderns i responsius. 💅
-
-    JavaScript (Vanilla JS): Lògica interactiva del frontend. 💡
-
-    Google AI Gemini API: Per a l'expansió de text (història de fons). ✍️
-
-    Google Imagen API (imagen-3.0-generate-002): Per a la generació d'imatges. 🖼️
-
-    JSZip: Per a la creació d'arxius ZIP al navegador. 🗜️
-
-    FileSaver.js: Per facilitar la descàrrega d'arxius generats. ⬇️
-
-❤️‍🔥 ¡La Teva Creativitat, Potenciada!
-
-Aquesta eina està dissenyada per encendre la teva imaginació i simplificar el procés de creació de personatges. ¡Esperem que gaudeixis utilitzant-la tant com nosaltres vam gaudir creant-la! 🎉
-📄 Llicència
-
-Aquest projecte es distribueix sota la llicència MIT. Consulta l'arxiu LICENSE per a més detalls. 📜
+**Gràcies per utilitzar i mostrar interès en el Creador de Fitxes de Personatge amb IA!**
